@@ -2,8 +2,16 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import web3 from "../ethereum/web3";
+import convertibleMark from "../ethereum/build/ConvertibleMark.json"
+const {CONTRACT_CONVERTIBLE_MARK} = process.env
 
 export default function Home() {
+  console.log(web3.address)
+  const contract = new web3.eth.Contract(convertibleMark.abi, CONTRACT_CONVERTIBLE_MARK)
+
+  let balance = contract.methods.balanceOf(web3.address).call();
+
+
   return (
     <div className={styles.container}>
       <Head>
@@ -23,7 +31,7 @@ export default function Home() {
         </p>
 
         <p>
-          {}
+          {balance} KM
         </p>
 
         <div className={styles.grid}>
