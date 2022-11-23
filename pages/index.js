@@ -5,7 +5,7 @@ import web3 from "../ethereum/web3";
 import convertibleMark from "../ethereum/build/ConvertibleMark.json"
 import {useEffect, useState} from "react";
 
-const CONTRACT_ADDRESS = "0xF5f7350Af6cFbc78E764365661771672f8C485A9";
+const CONTRACT_ADDRESS = "0x14c610c1840C7174dF3314A0cCf060CCAB9Ece58";
 
 export default function Home() {
     const [balance, setBalance] = useState(0);
@@ -13,8 +13,6 @@ export default function Home() {
     const [addresses, setAddresses] = useState([]);
     const [receiverAddress, setReceiverAddress] = useState("");
     const [receiverAmount, setReceiverAmount] = useState(10);
-
-    const contract = new web3.eth.Contract(convertibleMark.abi, CONTRACT_ADDRESS)
 
     useEffect(() => {
         async function f() {
@@ -24,6 +22,8 @@ export default function Home() {
             const address = accounts[0];
             setAddress(address)
 
+
+            const contract = new web3.eth.Contract(convertibleMark.abi, CONTRACT_ADDRESS)
             contract.options.address = CONTRACT_ADDRESS;
             try {
                 const blnc = await contract.methods.balanceOf(address).call();
@@ -35,7 +35,7 @@ export default function Home() {
         }
 
         f()
-    })
+    }, [addresses, address])
 
     async function onSubmit(event) {
         event.preventDefault();
@@ -44,7 +44,10 @@ export default function Home() {
             window.alert("Receiver amount is less than current balance!")
             return false;
         }
-        await contract.methods.transfer(receiverAddress, receiverAmount).call();
+        if(!!address){
+            const contract = new web3.eth.Contract(convertibleMark.abi, CONTRACT_ADDRESS, { from: address, gas: 0 })
+            await contract.methods.transfer(receiverAddress, receiverAmount).send();
+        }
         return false;
     }
 
