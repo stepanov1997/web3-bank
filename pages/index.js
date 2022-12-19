@@ -1,11 +1,9 @@
 import Head from 'next/head'
-import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import web3 from "../ethereum/web3";
-import convertibleMark from "../ethereum/build/ConvertibleMark.json"
+import convertibleMarkContract from "../util/contractDao/ConvertibleMarkContract";
 import {useEffect, useState} from "react";
-
-const CONTRACT_ADDRESS = "0x14c610c1840C7174dF3314A0cCf060CCAB9Ece58";
+import providerDao from "../util/providerDao";
+import {ethers, utils} from "ethers";
 
 export default function Home() {
     const [balance, setBalance] = useState(0);
@@ -14,19 +12,19 @@ export default function Home() {
     const [receiverAddress, setReceiverAddress] = useState("");
     const [receiverAmount, setReceiverAmount] = useState(10);
 
+    const provider = providerDao.getProvider();
+    const signer = provider.getSigner()
+
     useEffect(() => {
         async function f() {
-            const accounts = await web3.eth.getAccounts();
+            const accounts = await provider.listAccounts();
             setAddresses(accounts)
 
             const address = accounts[0];
             setAddress(address)
 
-
-            const contract = new web3.eth.Contract(convertibleMark.abi, CONTRACT_ADDRESS)
-            contract.options.address = CONTRACT_ADDRESS;
             try {
-                const blnc = await contract.methods.balanceOf(address).call();
+                const blnc = await convertibleMarkContract.balanceOf(address).call();
                 setBalance(blnc)
             } catch (e) {
                 console.log("Can't get a balance.", e)
@@ -45,8 +43,8 @@ export default function Home() {
             return false;
         }
         if(!!address){
-            const contract = new web3.eth.Contract(convertibleMark.abi, CONTRACT_ADDRESS, { from: address, gas: 0 })
-            await contract.methods.transfer(receiverAddress, receiverAmount).send();
+            const contract = convertibleMarkContract.connect(signer);
+            await contract.transfer(receiverAddress, utils.formatEther(receiverAmount));
         }
         return false;
     }
