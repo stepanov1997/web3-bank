@@ -2,7 +2,7 @@
 // but useful for running the script in a standalone fashion through `node <script>`.
 //
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
-// will compile your contracts, add the Hardhat Runtime Environment's members to the
+// will compile your contractDao, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
 const hre = require("hardhat");
 const fs = require('fs');
@@ -14,7 +14,7 @@ async function main() {
     const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
 
     const lockedAmount = hre.ethers.utils.parseEther("1");
-    const contractFiles = fs.readdirSync('./contracts');
+    const contractFiles = fs.readdirSync('./contractDao');
 
     // Iterate over the array of file names
     for (const file of contractFiles) {
