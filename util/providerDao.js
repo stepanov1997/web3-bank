@@ -1,11 +1,15 @@
 import {ethers} from "ethers";
 
 function getDevProvider() {
-    return new ethers.providers.JsonRpcProvider("http://localhost:8545");
+    if (typeof window !== "undefined") {
+        return new ethers.providers.JsonRpcProvider("http://localhost:8545");
+    }
 }
 
-function getProvider() {
-    return getDevProvider();
+function getMetamaskProvider() {
+    if (typeof window !== "undefined") {
+        return new ethers.providers.Web3Provider(window.ethereum);
+    }
 }
 
-export default { getProvider };
+export default { getDevProvider, getMetamaskProvider };
