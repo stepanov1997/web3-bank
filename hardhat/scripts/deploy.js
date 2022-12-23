@@ -14,7 +14,7 @@ async function main() {
     const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
 
     const lockedAmount = hre.ethers.utils.parseEther("1");
-    const contractFiles = fs.readdirSync('./contractDao');
+    const contractFiles = fs.readdirSync('./contracts');
 
     // Iterate over the array of file names
     for (const file of contractFiles) {

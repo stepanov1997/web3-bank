@@ -3,7 +3,7 @@ import styles from '../styles/Home.module.css'
 import convertibleMarkContract from "../util/contractDao/ConvertibleMarkContract";
 import {useEffect, useState} from "react";
 import providerDao from "../util/providerDao";
-import {ethers, utils} from "ethers";
+import {utils} from "ethers";
 
 export default function Home() {
     const [balance, setBalance] = useState(0);
@@ -12,28 +12,29 @@ export default function Home() {
     const [receiverAddress, setReceiverAddress] = useState("");
     const [receiverAmount, setReceiverAmount] = useState(10);
 
-    const provider = providerDao.getProvider();
-    const signer = provider.getSigner()
+    const provider = providerDao?.getMetamaskProvider();
+    const signer = provider?.getSigner()
 
     useEffect(() => {
-        async function f() {
-            const accounts = await provider.listAccounts();
+        async function asyncFunction() {
+            const accounts = await provider?.listAccounts();
             setAddresses(accounts)
 
-            const address = accounts[0];
-            setAddress(address)
-
-            try {
-                const blnc = await convertibleMarkContract.balanceOf(address).call();
-                setBalance(blnc)
-            } catch (e) {
-                console.log("Can't get a balance.", e)
+            if (!!accounts && accounts.length > 0) {
+                setAddress(accounts[0])
+                try {
+                    const blnc = await convertibleMarkContract.balanceOf(address).call();
+                    setBalance(blnc)
+                } catch (e) {
+                    console.log("Can't get a balance.", e)
+                }
             }
+
 
         }
 
-        f()
-    }, [addresses, address])
+        asyncFunction()
+    }, [address])
 
     async function onSubmit(event) {
         event.preventDefault();
@@ -42,7 +43,7 @@ export default function Home() {
             window.alert("Receiver amount is less than current balance!")
             return false;
         }
-        if(!!address){
+        if (!!address) {
             const contract = convertibleMarkContract.connect(signer);
             await contract.transfer(receiverAddress, utils.formatEther(receiverAmount));
         }
@@ -59,7 +60,7 @@ export default function Home() {
 
             <select>
                 {
-                    addresses.map((value, index) => (
+                    addresses?.map((value, index) => (
                         <option key={index}>{value}</option>
                     ))
                 }
