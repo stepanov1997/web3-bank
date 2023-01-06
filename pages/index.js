@@ -3,40 +3,42 @@ import styles from '../styles/Home.module.css'
 import convertibleMarkContract from "../util/contractDao/ConvertibleMarkContract";
 import {useEffect, useState} from "react";
 import providerDao from "../util/providerDao";
-import {utils} from "ethers";
 
 export default function Home() {
-    const [balance, setBalance] = useState(0);
+    const [balance, setBalance] = useState(0.0);
     const [address, setAddress] = useState(undefined);
     const [addresses, setAddresses] = useState([]);
     const [receiverAddress, setReceiverAddress] = useState("");
     const [receiverAmount, setReceiverAmount] = useState(10);
+
+    const [mintAmount, setMintAmount] = useState(1n);
 
     const provider = providerDao?.getMetamaskProvider();
     const signer = provider?.getSigner()
 
     useEffect(() => {
         async function asyncFunction() {
+            await provider?.provider.enable();
             const accounts = await provider?.listAccounts();
-            setAddresses(accounts)
 
-            if (!!accounts && accounts.length > 0) {
-                setAddress(accounts[0])
-                try {
-                    const blnc = await convertibleMarkContract.balanceOf(address).call();
-                    setBalance(blnc)
-                } catch (e) {
-                    console.log("Can't get a balance.", e)
-                }
+            if (!accounts || accounts.length == 0) {
+                return;
             }
 
+            try {
+                const blnc = await convertibleMarkContract.balanceOf(accounts[0]);
+                setBalance(fromAdaptedNumber(blnc))
+            } catch (e) {
+                console.log("Can't get a balance.", e)
+            }
 
+            setAddresses(accounts)
+            setAddress(accounts[0])
         }
-
         asyncFunction()
     }, [address])
 
-    async function onSubmit(event) {
+    async function sendTransaction(event) {
         event.preventDefault();
 
         if (receiverAmount > balance) {
@@ -45,9 +47,38 @@ export default function Home() {
         }
         if (!!address) {
             const contract = convertibleMarkContract.connect(signer);
-            await contract.transfer(receiverAddress, utils.formatEther(receiverAmount));
+            await contract.transfer(receiverAddress, adaptNumber(receiverAmount));
         }
         return false;
+    }
+
+    async function mint(event) {
+        event.preventDefault();
+
+        if (!confirm(`Are you sure you want to mint ${mintAmount} KM?`)) {
+            window.alert("Ok.")
+            return false;
+        }
+        if (!address) {
+            return false;
+        }
+        const contract = convertibleMarkContract.connect(signer);
+        await contract.mint(address, adaptNumber(mintAmount));
+        window.alert("You successfully sent a mint transaction!")
+        return true;
+    }
+
+    function adaptNumber(amount) {
+        const amountN = BigInt(amount);
+        const decimalsN = BigInt(Math.pow(10,18));
+        return (amountN * decimalsN).toString();
+    }
+
+    function fromAdaptedNumber(amount) {
+        const amountN = BigInt(amount);
+        const decimalsN = BigInt(Math.pow(10,16));
+        const balanceString = (amountN / decimalsN).toString();
+        return parseFloat(balanceString)/100;
     }
 
     return (
@@ -67,12 +98,20 @@ export default function Home() {
             </select>
             <p>{balance} KM ({address})</p>
 
-            <form onSubmit={async event => await onSubmit(event)}>
+            <form onSubmit={async event => await sendTransaction(event)}>
                 <p>Send crypto KM to wallet:</p>
                 <input type={"text"} value={receiverAddress} onChange={e => setReceiverAddress(e.target.value)}/>
                 <input type={"number"} value={receiverAmount}
                        onChange={e => setReceiverAmount(parseFloat(e.target.value))}/>
                 <input type={"submit"} value={"Send money"}/>
+            </form>
+            <br></br>
+            
+            <form onSubmit={async event => await mint(event)}>
+                <p>Mint KM for account:</p>
+                <input type={"number"} value={mintAmount}
+                       onChange={e => setMintAmount(parseFloat(e.target.value))}/>
+                <input type={"submit"} value={"Mint money"}/>
             </form>
 
         </div>
