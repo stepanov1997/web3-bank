@@ -29,12 +29,19 @@ export default function Home() {
         }
     };
 
-    useEffect(() => {
-        provider?.provider.on("accountsChanged", (accounts) => {
+    const accountChangedListener = (accounts) => {
             setAddresses(accounts)
             setAddress(accounts[0])
-        });
-    }, [])
+        };
+
+    useEffect(() => {
+        provider?.provider.on("accountsChanged", accountChangedListener);
+        return () => {
+            if(provider && provider.removeListener) {
+                provider.provider.removeListener("accountsChanged", accountChangedListener);
+            }
+        };
+    }, []);
 
     useEffect(() => {
         async function asyncFunction() {
