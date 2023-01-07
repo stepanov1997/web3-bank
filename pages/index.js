@@ -60,10 +60,17 @@ export default function Home() {
             return false;
         }
         if (!address) {
+            window.alert('There is no address of wallet.')
             return false;
         }
         const contract = convertibleMarkContract.connect(signer);
-        await contract.mint(address, adaptNumber(mintAmount));
+        const transactionHash = await contract.mint(address, adaptNumber(mintAmount));
+        const status = await provider.waitForTransaction(transactionHash)
+        console.log(status)
+        if(status === 0 || status===null){
+            window.alert('Transaction is not processed successfully.')
+            return false;
+        }
         window.alert("You successfully sent a mint transaction!")
         return true;
     }
