@@ -8,7 +8,7 @@ function getDevProvider() {
 
 function getMetamaskProvider() {
     if (typeof window !== "undefined") {
-        return new ethers.providers.Web3Provider(window.ethereum);
+        return new ethers.providers.Web3Provider(window.ethereum, "any");
     }
 }
 
