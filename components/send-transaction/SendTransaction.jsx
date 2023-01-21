@@ -1,13 +1,18 @@
 import {LoadingSpinner} from "../loading-spinner";
 import React, {useState} from "react";
 import convertibleMarkDao from "../../core/dao/convertible-mark-contract";
+import {useDispatch, useSelector} from "react-redux";
+import {selectBalance} from "../../redux-slices/balance-slice";
+import {executeRefresh} from "../../redux-slices/refresh-slice";
 
 
-export const SendTransaction = ({balance, refresh}) => {
-
+export const SendTransaction = () => {
     const [loading, setLoading] = useState(false)
     const [receiverAddress, setReceiverAddress] = useState("");
     const [receiverAmount, setReceiverAmount] = useState(10);
+
+    const balance = useSelector(selectBalance);
+    const dispatch = useDispatch();
 
     async function sendTransaction(event) {
         event.preventDefault();
@@ -28,7 +33,7 @@ export const SendTransaction = ({balance, refresh}) => {
             return false;
         }
         window.alert("You successfully sent a transaction!")
-        refresh()
+        dispatch(executeRefresh())
         setLoading(false)
         return true;
     }
