@@ -1,11 +1,17 @@
 import {LoadingSpinner} from "../loading-spinner";
 import React, {useState} from "react";
 import convertibleMarkDao from "../../core/dao/convertible-mark-contract";
+import {useDispatch, useSelector} from "react-redux";
+import {selectAddress} from "../../redux-slices/address-slice";
+import {executeRefresh} from "../../redux-slices/refresh-slice";
 
 
-export const Mint = ({address, refresh}) => {
+export const Mint = () => {
     const [loading, setLoading] = useState("")
     const [mintAmount, setMintAmount] = useState(1n);
+
+    const address = useSelector(selectAddress);
+    const dispatch = useDispatch();
 
     async function mint(event) {
         event.preventDefault();
@@ -30,7 +36,7 @@ export const Mint = ({address, refresh}) => {
                 return false;
             }
             window.alert("You successfully sent a mint transaction!")
-            refresh()
+            dispatch(executeRefresh())
         } catch (e) {
             console.error("Mint error: " + e)
             return false;
