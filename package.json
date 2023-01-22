@@ -13,6 +13,7 @@
     "@nomicfoundation/hardhat-network-helpers": "^1.0.7",
     "@openzeppelin/contracts": "^4.8.0",
     "@reduxjs/toolkit": "^1.9.1",
+    "@uniswap/v3-periphery": "^1.4.3",
     "bignumber.js": "^9.1.1",
     "dotenv": "^16.0.3",
     "eslint": "8.27.0",
