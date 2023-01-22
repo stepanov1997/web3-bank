@@ -7,7 +7,7 @@ contract Savings {
     uint256 public interestRate;
 
     constructor() public {
-        owner = msg.sender;
+        owner = payable(msg.sender);
     }
 
     function deposit(uint256 _amount) public {
@@ -20,7 +20,7 @@ contract Savings {
         require(isActive[msg.sender], "Account is not active");
         require(savings[msg.sender] >= _amount, "Insufficient funds");
         savings[msg.sender] -= _amount;
-        msg.sender.transfer(_amount);
+        payable(msg.sender).transfer(_amount);
     }
 
     function activate() public {

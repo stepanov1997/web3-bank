@@ -23,9 +23,9 @@ contract LoanWithdraw {
     mapping(address => PhysicalCollateral) public physicalCollateral;
 
     constructor() public {
-        owner = msg.sender;
+        owner = payable(msg.sender);
         // set the address of the USDT token contract
-        usdtAddress = address(0x8f8221afbb33998d8584a2b05749ba73c37a938a);
+        usdtAddress = payable(address(0x0055d398326f99059ff775485246999027b3197955));
     }
 
     //Funkcija lend omogućava korisniku da podnese zahtev za kredit, proveravajući prvo da li je iznos kredita manji od maksimalnog iznosa kredita, da li količina kolaterala iznosi barem LTV puta iznos kredita, da li korisnik ima dovoljno sredstva za kolateral i da li smart contract ima dovoljno KM tokena za izdavanje kredita. Ako su svi uslovi ispunjeni, kredit se izdaje i kolateral se smešta u smart contract.
@@ -34,6 +34,7 @@ contract LoanWithdraw {
         require(loans[msg.sender] == 0, "User already has an existing loan");
         if (_isPhysicalCollateral) {
             require(_collateralManager != address(0), "Collateral manager must be set for physical collateral");
+            uint256 _collateralValueInUSDT = physicalCollateral[msg.sender].valueInUSDT;
             require(_collateralValueInUSDT > 0, "Collateral value must be greater than 0 for physical collateral");
             physicalCollateral[msg.sender] = PhysicalCollateral(false, _physicalCollateralDescription, _collateralValueInUSDT, convertFromUSDT(_collateralValueInUSDT));
             _collateralAmount = physicalCollateral[msg.sender].valueInKM;
@@ -47,7 +48,7 @@ contract LoanWithdraw {
         loans[msg.sender] = _loanAmount;
         collateral[msg.sender] = _collateralAmount;
         collateralManager[msg.sender] = _collateralManager;
-        msg.sender.transfer(_loanAmount);
+        payable(msg.sender).transfer(_loanAmount);
     }
 
     function approvePhysicalCollateral(address _user) public {
