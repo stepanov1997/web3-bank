@@ -1,4 +1,3 @@
-import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import React, {useEffect} from "react";
 import convertibleMarkDao from '../core/dao/convertible-mark-contract'
@@ -38,15 +37,15 @@ export default function Home() {
 
     // noinspection JSValidateTypes
     return (
-        <div className={styles.container}>
-            <Head>
-                <title>Web3 bank</title>
-                <link rel="icon" href="/favicon.png"/>
-            </Head>
-            <Balance/>
-            <SendTransaction/>
-            <br></br>
-            <Mint/>
+        <div>
+            <div className="ui segment">
+                <div className={styles.container}>
+                    <Balance/>
+                    <SendTransaction/>
+                    <br></br>
+                    <Mint/>
+                </div>
+            </div>
         </div>
     )
 }
