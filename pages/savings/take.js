@@ -1,10 +1,10 @@
 import React from "react";
 
-export default function Savings() {
+export default function SavingsTakePage() {
 
     return (
         <div>
-            <p>Savings</p>
+            <p>Savings - Take</p>
         </div>
     )
 }

@@ -34,7 +34,7 @@
 //         // Swap
 //         await swapExamples.swapExactInputSingle(amountIn)
 //
-//         console.log("DAI balance", await dai.balanceOf(accounts[0].address))
+//         console.log("DAI balance.js", await dai.balanceOf(accounts[0].address))
 //     })
 //
 //     it("swapExactOutputSingle", async () => {
@@ -48,7 +48,7 @@
 //         // Swap
 //         await swapExamples.swapExactOutputSingle(daiAmountOut, wethAmountInMax)
 //
-//         console.log("DAI balance", await dai.balanceOf(accounts[0].address))
+//         console.log("DAI balance.js", await dai.balanceOf(accounts[0].address))
 //     })
 //
 //     it("swapExactInputMultihop", async () => {
@@ -61,7 +61,7 @@
 //         // Swap
 //         await swapExamples.swapExactInputMultihop(amountIn)
 //
-//         console.log("DAI balance", await dai.balanceOf(accounts[0].address))
+//         console.log("DAI balance.js", await dai.balanceOf(accounts[0].address))
 //     })
 //
 //     it("swapExactOutputMultihop", async () => {
@@ -75,6 +75,6 @@
 //         // Swap
 //         await swapExamples.swapExactOutputMultihop(daiAmountOut, wethAmountInMax)
 //
-//         console.log("DAI balance", await dai.balanceOf(accounts[0].address))
+//         console.log("DAI balance.js", await dai.balanceOf(accounts[0].address))
 //     })
 // })

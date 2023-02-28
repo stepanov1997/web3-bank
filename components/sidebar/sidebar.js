@@ -24,12 +24,11 @@ export default function MySidebar({children}) {
         dimmed: false,
         visible: true,
     })
-
     const { animation, dimmed, direction, visible } = state
 
     function fillSidebar() {
-        switch(pathname) {
-            case "/": return (
+        if (pathname.startsWith("/home")) {
+            return (
                 <Sidebar
                     as={Menu}
                     animation={animation}
@@ -40,21 +39,22 @@ export default function MySidebar({children}) {
                     visible={visible}
                     width='thin'
                 >
-                    <Menu.Item as='a'>
-                        <Icon name='credit card' />
+                    <Menu.Item as='a' link={true} href={'/home/balance'}>
+                        <Icon name='credit card'/>
                         Current balance
                     </Menu.Item>
-                    <Menu.Item as='a'>
-                        <Icon name='history' />
+                    <Menu.Item as='a' link={true} href={'/home/history'}>
+                        <Icon name='history'/>
                         History of transanctions
                     </Menu.Item>
-                    <Menu.Item as='a'>
-                        <Icon name='send' />
+                    <Menu.Item as='a' link={true} href={'/home/send'}>
+                        <Icon name='send'/>
                         Send a crypto money
                     </Menu.Item>
                 </Sidebar>
             );
-            case "/loan-withdraw": return (
+        } else if (pathname.startsWith("/loan-withdraw")) {
+            return (
                 <Sidebar
                     as={Menu}
                     animation={animation}
@@ -65,21 +65,22 @@ export default function MySidebar({children}) {
                     visible={visible}
                     width='thin'
                 >
-                    <Menu.Item as='a'>
-                        <Icon name='percent' />
+                    <Menu.Item as='a' link={true} href={'/loan-withdraw/current'}>
+                        <Icon name='percent'/>
                         Show current loans
                     </Menu.Item>
-                    <Menu.Item as='a'>
-                        <Icon name='add' />
+                    <Menu.Item as='a' link={true} href={'/loan-withdraw/request'}>
+                        <Icon name='add'/>
                         Create request for loan withdraw
                     </Menu.Item>
-                    <Menu.Item as='a'>
-                        <Icon name='calculator' />
+                    <Menu.Item as='a' link={true} href={'/loan-withdraw/calculate'}>
+                        <Icon name='calculator'/>
                         Calculate loan
                     </Menu.Item>
                 </Sidebar>
             );
-            case "/savings": return (
+        } else if (pathname.startsWith("/savings")) {
+            return (
                 <Sidebar
                     as={Menu}
                     animation={animation}
@@ -90,25 +91,26 @@ export default function MySidebar({children}) {
                     visible={visible}
                     width='thin'
                 >
-                    <Menu.Item as='a'>
-                        <Icon name='box' />
+                    <Menu.Item as='a' link={true} href={'/savings/current'}>
+                        <Icon name='box'/>
                         Show current savings
                     </Menu.Item>
-                    <Menu.Item as='a'>
-                        <Icon name='upload' />
+                    <Menu.Item as='a' link={true} href={'/savings/save'}>
+                        <Icon name='upload'/>
                         Save a crypto money
                     </Menu.Item>
-                    <Menu.Item as='a'>
-                        <Icon name='download' />
+                    <Menu.Item as='a' link={true} href={'/savings/take'}>
+                        <Icon name='download'/>
                         Take saved crypto money
                     </Menu.Item>
-                    <Menu.Item as='a'>
-                        <Icon name='calculator' />
+                    <Menu.Item as='a' link={true} href={'/savings/calculate'}>
+                        <Icon name='calculator'/>
                         Calculate interesting savings
                     </Menu.Item>
                 </Sidebar>
             );
-            case "/statistics": return (
+        } else if (pathname.startsWith("/statistics")) {
+            return (
                 <Sidebar
                     as={Menu}
                     animation={animation}
@@ -119,16 +121,16 @@ export default function MySidebar({children}) {
                     visible={visible}
                     width='thin'
                 >
-                    <Menu.Item as='a'>
-                        <Icon name='chart bar' />
+                    <Menu.Item as='a' link={true} href={'/statistics/balance'}>
+                        <Icon name='chart bar'/>
                         Balance statistics
                     </Menu.Item>
-                    <Menu.Item as='a'>
-                        <Icon name='chart bar' />
+                    <Menu.Item as='a' link={true} href={'/statistics/loan-withdraw'}>
+                        <Icon name='chart bar'/>
                         Loan withdraw statistics
                     </Menu.Item>
-                    <Menu.Item as='a'>
-                        <Icon name='chart bar' />
+                    <Menu.Item as='a' link={true} href={'/statistics/savings'}>
+                        <Icon name='chart bar'/>
                         Savings statistics
                     </Menu.Item>
                 </Sidebar>
