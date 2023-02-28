@@ -1,16 +1,12 @@
-import styles from '../styles/Home.module.css'
 import React, {useEffect} from "react";
-import convertibleMarkDao from '../core/dao/convertible-mark-contract'
-import providerDao from '../core/dao/provider'
-import SendTransaction from "../components/send-transaction";
-import Mint from "../components/mint";
-import Balance from "../components/balance";
+import convertibleMarkDao from '../../core/dao/convertible-mark-contract'
+import providerDao from '../../core/dao/provider'
 import {useDispatch, useSelector} from "react-redux";
-import {setBalance} from '../redux-slices/balance-slice'
-import {selectAddress, setAddress} from "../redux-slices/address-slice";
-import {selectRefresh} from "../redux-slices/refresh-slice";
+import {setBalance} from '../../redux-slices/balance-slice'
+import {selectAddress, setAddress} from "../../redux-slices/address-slice";
+import {selectRefresh} from "../../redux-slices/refresh-slice";
 
-export default function Home() {
+export default function HomeSendPage() {
     const dispatch = useDispatch();
     const refresh = useSelector(selectRefresh);
     const address = useSelector(selectAddress);
@@ -29,7 +25,7 @@ export default function Home() {
             try {
                 dispatch(setBalance(await convertibleMarkDao.balanceOf(currentAddress)))
             } catch (e) {
-                console.log("Can't get a balance.", e)
+                console.log("Can't get a balance.js.", e)
             }
             dispatch(setAddress(currentAddress))
         })()
@@ -39,12 +35,7 @@ export default function Home() {
     return (
         <div>
             <div className="ui segment">
-                <div className={styles.container}>
-                    <Balance/>
-                    <SendTransaction/>
-                    <br></br>
-                    <Mint/>
-                </div>
+                Send
             </div>
         </div>
     )
