@@ -48,6 +48,7 @@ export const Mint = () => {
 
     return (
         <form onSubmit={async event => await mint(event)}>
+            <h3>Ovo treba obrisati, jer nema smisla da postoji.</h3>
             <p>Mint KM for account:</p>
             <input type={"number"} value={mintAmount.toString()}
                    onChange={e => setMintAmount(e.target.value)}/>

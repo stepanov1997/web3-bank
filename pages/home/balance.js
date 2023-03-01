@@ -41,7 +41,6 @@ export default function HomeBalancePage() {
             <div className="ui segment">
                 <div className={styles.container}>
                     <Balance/>
-                    <SendTransaction/>
                     <br></br>
                     <Mint/>
                 </div>

@@ -1,7 +1,10 @@
 import React from 'react'
-import Image from 'next/image'
-import image from '../../public/loading.gif'
+import {Dimmer, Loader} from "semantic-ui-react";
 
 export function LoadingSpinner() {
-    return (<Image src={image} alt={"no pic"} width={200} height={100}/>);
+    return (
+        <Dimmer active inverted>
+            <Loader inverted content='Waiting for interaction with Metamask' />
+        </Dimmer>
+    );
 }
