@@ -5,6 +5,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {setBalance} from '../../redux-slices/balance-slice'
 import {selectAddress, setAddress} from "../../redux-slices/address-slice";
 import {selectRefresh} from "../../redux-slices/refresh-slice";
+import SendTransaction from "../../components/send-transaction";
 
 export default function HomeSendPage() {
     const dispatch = useDispatch();
@@ -35,7 +36,7 @@ export default function HomeSendPage() {
     return (
         <div>
             <div className="ui segment">
-                Send
+                <SendTransaction/>
             </div>
         </div>
     )
