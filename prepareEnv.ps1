@@ -1,4 +1,4 @@
-cd hardhat || exit 1
+cd hardhat
 #npx hardhat node &
 npx hardhat run --network localhost scripts/deploy.js
 cd ..
