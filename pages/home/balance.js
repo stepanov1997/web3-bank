@@ -2,7 +2,6 @@ import styles from '../../styles/Home.module.css'
 import React, {useEffect} from "react";
 import convertibleMarkDao from '../../core/dao/convertible-mark-contract'
 import providerDao from '../../core/dao/provider'
-import SendTransaction from "../../components/send-transaction";
 import Mint from "../../components/mint";
 import Balance from "../../components/balance";
 import {useDispatch, useSelector} from "react-redux";
