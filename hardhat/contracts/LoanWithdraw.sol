@@ -6,7 +6,7 @@ contract LoanWithdraw {
     address payable public owner;
     mapping(address => uint256) public loans;
     mapping(address => uint256) public collateral;
-    mapping(address => address) public collateralManager;
+    address[] public collateralManagers;
     uint256 public interestRate;
     uint256 public LTV;
     uint256 public maxLoan;
@@ -24,12 +24,18 @@ contract LoanWithdraw {
 
     constructor() public {
         owner = payable(msg.sender);
-        // set the address of the USDT token contract
-        usdtAddress = payable(address(0x0055d398326f99059ff775485246999027b3197955));
+    }
+
+    function addCollateralManager(address collateralManagerAddress) {
+        // TODO: Napraviti posebne naloge za menadzere
+        for (uint i = 0; i < collateralManagers.length; i++) {
+            require(collateralManagers[i] != collateralManagerAddress, "Address already exists in the array");
+        }
+        collateralManagers.push(collateralManagerAddress);
     }
 
     //Funkcija lend omogućava korisniku da podnese zahtev za kredit, proveravajući prvo da li je iznos kredita manji od maksimalnog iznosa kredita, da li količina kolaterala iznosi barem LTV puta iznos kredita, da li korisnik ima dovoljno sredstva za kolateral i da li smart contract ima dovoljno KM tokena za izdavanje kredita. Ako su svi uslovi ispunjeni, kredit se izdaje i kolateral se smešta u smart contract.
-    function lend(uint256 _loanAmount, uint256 _collateralAmount, bool _isPhysicalCollateral, string memory _physicalCollateralDescription, address _collateralManager) public {
+    function lend(uint256 _loanAmount, uint256 _collateralAmount, bool _isPhysicalCollateral, string memory _physicalCollateralDescription) public {
         require(_loanAmount <= maxLoan, "Loan amount exceeds the maximum limit");
         require(loans[msg.sender] == 0, "User already has an existing loan");
         if (_isPhysicalCollateral) {
@@ -47,7 +53,6 @@ contract LoanWithdraw {
         require(address(this).balance >= _loanAmount, "This contract does not have enough KM to lend");
         loans[msg.sender] = _loanAmount;
         collateral[msg.sender] = _collateralAmount;
-        collateralManager[msg.sender] = _collateralManager;
         payable(msg.sender).transfer(_loanAmount);
     }
 
