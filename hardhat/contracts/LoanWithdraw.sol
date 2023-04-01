@@ -1,33 +1,40 @@
 pragma solidity ^0.8.17;
 
+import "./ConvertibleMark.sol";
+
 // Ovaj smart contract omogućava korisnicima da dižu kredit od pool-a KM tokena, a da koriste USDT kao kolateral. Smart contract sadrži funkcije za izdavanje kredita (lend), otplatu kredita (repay), likvidaciju kolaterala (liquidate), kao i funkcije za podešavanje parametara smart contract-a, kao što su kamatna stopa (setInterestRate), LTV (setLTV) i maksimalni iznos kredita (setMaxLoan).
 // Ova implementacija koristi strukturu `PhysicalCollateral` koja sadrži podatke o fizičkoj hipoteci kao što su opis, odobrenost i vrijednost u USDT-u ili KM-u. Funkcija `lend` također sadrži logiku za konverziju valuta i proveru ispravnosti unetih podataka o fizičkoj hipoteci.
 contract LoanWithdraw {
     address payable public owner;
+    ConvertibleMark private convertibleMarkContract;
     mapping(address => uint256) public loans;
     mapping(address => uint256) public collateral;
+    mapping(address => PhysicalCollateral) public physicalCollateral;
     address[] public collateralManagers;
     uint256 public interestRate;
     uint256 public LTV;
+    uint256 public ethTotalSupply;
     uint256 public maxLoan;
     // Address of the USDT token contract
     address payable public usdtAddress;
 
     struct PhysicalCollateral {
         bool isApproved;
+        uint256 loanAmount;
         string description;
-        uint256 valueInUSDT;
-        uint256 valueInKM;
+        bytes documentation;
+        uint256 amount;
+        string currency;
     }
 
-    mapping(address => PhysicalCollateral) public physicalCollateral;
 
-    constructor() public {
+    constructor(address _convertibleMarkContract) public {
         owner = payable(msg.sender);
+        convertibleMarkContract = ConvertibleMark(_convertibleMarkContract);
+        LTV = 0.8;
     }
 
-    function addCollateralManager(address collateralManagerAddress) {
-        // TODO: Napraviti posebne naloge za menadzere
+    function addCollateralManager(address collateralManagerAddress) public onlyOwner {
         for (uint i = 0; i < collateralManagers.length; i++) {
             require(collateralManagers[i] != collateralManagerAddress, "Address already exists in the array");
         }
@@ -35,34 +42,34 @@ contract LoanWithdraw {
     }
 
     //Funkcija lend omogućava korisniku da podnese zahtev za kredit, proveravajući prvo da li je iznos kredita manji od maksimalnog iznosa kredita, da li količina kolaterala iznosi barem LTV puta iznos kredita, da li korisnik ima dovoljno sredstva za kolateral i da li smart contract ima dovoljno KM tokena za izdavanje kredita. Ako su svi uslovi ispunjeni, kredit se izdaje i kolateral se smešta u smart contract.
-    function lend(uint256 _loanAmount, uint256 _collateralAmount, bool _isPhysicalCollateral, string memory _physicalCollateralDescription) public {
+    function lend(uint256 _loanAmount, uint256 _collateralAmount) public {
         require(_loanAmount <= maxLoan, "Loan amount exceeds the maximum limit");
         require(loans[msg.sender] == 0, "User already has an existing loan");
-        if (_isPhysicalCollateral) {
-            require(_collateralManager != address(0), "Collateral manager must be set for physical collateral");
-            uint256 _collateralValueInUSDT = physicalCollateral[msg.sender].valueInUSDT;
-            require(_collateralValueInUSDT > 0, "Collateral value must be greater than 0 for physical collateral");
-            physicalCollateral[msg.sender] = PhysicalCollateral(false, _physicalCollateralDescription, _collateralValueInUSDT, convertFromUSDT(_collateralValueInUSDT));
-            _collateralAmount = physicalCollateral[msg.sender].valueInKM;
-        } else {
-            // convert _collateralAmount from USDT to KM using the current exchange rate
-            _collateralAmount = convertFromUSDT(_collateralAmount);
-        }
-        require(_collateralAmount >= _loanAmount * LTV, "Collateral amount is insufficient");
-        require(msg.sender.balance >= _collateralAmount || _isPhysicalCollateral, "Sender does not have enough collateral to lend");
+        require(_collateralAmount >= convertConvertibleMarksToEths(_loanAmount) * LTV, "Collateral amount is insufficient");
+        require(msg.sender.balance >= _collateralAmount, "Sender does not have enough collateral to lend");
+
         require(address(this).balance >= _loanAmount, "This contract does not have enough KM to lend");
         loans[msg.sender] = _loanAmount;
         collateral[msg.sender] = _collateralAmount;
+        convertConvertibleMarksToEths(_loanAmount);
         payable(msg.sender).transfer(_loanAmount);
     }
 
-    function approvePhysicalCollateral(address _user) public {
+    function createRequestToLendWithPhysicalCollateral(uint256 _loanAmount, uint256 _collateralAmount, bytes _collateralDocumentation, string _collateralCurrency, string memory _physicalCollateralDescription) public {
+        require(_loanAmount <= maxLoan, "Loan amount exceeds the maximum limit");
+        require(loans[msg.sender] == 0, "User already has an existing loan");
+        require(_collateralAmount > 0, "Physical collateral value must be greater than 0 for physical collateral");
+        require(address(this).balance >= _loanAmount, "This contract does not have enough KM to lend");
+        physicalCollateral[msg.sender] = PhysicalCollateral(false, _loanAmount, _physicalCollateralDescription, _collateralDocumentation, _collateralAmount, _loanAmount);
+    }
+
+    function approvePhysicalCollateral(address _user) public onlyPhysicalCollateralManager {
         require(msg.sender == collateralManager[_user], "Only collateral manager can approve physical collateral");
-        require(physicalCollateral[_user].isApproved != true, "Collateral is already approved");
-        // Perform additional validation and checks on physical collateral
-        // ...
-        // Approve collateral
-        physicalCollateral[_user].isApproved = true;
+        PhysicalCollateral physicalCollateral = physicalCollateral[_user];
+        require(physicalCollateral.isApproved != true, "Collateral is already approved");
+        physicalCollateral.isApproved = true;
+        loans[msg.sender] = physicalCollateral.loanAmount;
+        payable(msg.sender).transfer(_loanAmount);
     }
 
     // Funkcija repay omogućava korisniku da otplati deo ili celokupan kredit, proveravajući da li iznos otplate prelazi iznos kredita koji je korisnik duguje.
@@ -76,13 +83,13 @@ contract LoanWithdraw {
     }
 
     //Funkcija liquidate omogućava vlasniku smart contract-a da likvidira kolateral u slučaju da korisnik ne otplaćuje kredit, proveravajući da li iznos kredita prelazi LTV od iznosa kolaterala.
-    function liquidate(address payable _user) public {
+    function liquidate(address payable _user) public onlyOwner {
         require(msg.sender == owner || msg.sender == collateralManager[_user], "Only owner or collateral manager can liquidate");
         if (physicalCollateral[_user].isApproved) {
             require(loans[_user] >= physicalCollateral[_user].valueInKM * (1 - LTV), "Loan amount is less than the liquidation threshold");
             // Perform physical collateral liquidation
-            //...
-            physicalCollateral[_user] = PhysicalCollateral(false, "", 0, 0);
+            require(bytes(physicalCollateral[_user]).length > 0, "Entry does not exist.");
+            delete physicalCollateral[_user];
             collateral[_user] = 0;
             loans[_user] = 0;
         } else {
@@ -94,30 +101,48 @@ contract LoanWithdraw {
         }
     }
 
-    function setInterestRate(uint256 _interestRate) public {
-        require(msg.sender == owner, "Only owner can set interest rate");
-        // convert _interestRate to USDT using the current exchange rate
-        _interestRate = convertToUSDT(_interestRate);
+    // Setters
+    function setInterestRate(uint256 _interestRate) public onlyOwner {
         interestRate = _interestRate;
     }
 
-    function setLTV(uint256 _LTV) public {
-        require(msg.sender == owner, "Only owner can set LTV ratio");
+    function setLTV(uint256 _LTV) public onlyOwner {
         LTV = _LTV;
     }
 
-    function setMaxLoan(uint256 _maxLoan) public {
-        require(msg.sender == owner, "Only owner can set max loan amount");
+    function setMaxLoan(uint256 _maxLoan) public onlyOwner {
         maxLoan = _maxLoan;
     }
 
-    function convertFromUSDT(uint256 _usdtAmount) private view returns (uint256) {
-        // code to convert _usdtAmount to KM using the current exchange rate
-        return _usdtAmount;
+    function setEthTotalSupply(uint256 _ethTotalSupply) public  onlyOwner{
+        ethTotalSupply = _ethTotalSupply;
     }
 
-    function convertToUSDT(uint256 _kmAmount) private view returns (uint256) {
-        // code to convert _kmAmount to USDT using the current exchange rate
-        return _kmAmount;
+    // Converters
+    function convertConvertibleMarksToEths(uint256 _amountInConvertibleMarks) private {
+        uint256 totalSupply = convertibleMarkContract.totalSupply();
+        return _amountInConvertibleMarks * totalSupply / ethTotalSupply;
+    }
+    function convertEthsToConvertibleMarks(uint256 _amountInEths) private {
+        uint256 totalSupply = convertibleMarkContract.totalSupply();
+        return _amountInEths * ethTotalSupply / totalSupply;
+    }
+
+    // modifiers
+    modifier onlyPhysicalCollateralManager() {
+        bool exists = false;
+        for (uint i = 0; i < collateralManagers.length; i++) {
+            if (collateralManagers[i] == msg.sender) {
+                exists = true;
+                break;
+            }
+        }
+        require(exists, "Only the physical collateral manager can call this function.");
+        _;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the contract owner can call this function.");
+        _;
     }
 }
