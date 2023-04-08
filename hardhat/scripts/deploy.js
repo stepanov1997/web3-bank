@@ -16,6 +16,8 @@ async function main() {
     const lockedAmount = hre.ethers.utils.parseEther("1");
     const contractFiles = fs.readdirSync('./contracts');
 
+    let convertibleMarkAddress = undefined
+
     // Iterate over the array of file names
     for (const file of contractFiles) {
         // Import the contract artifact object
@@ -24,13 +26,15 @@ async function main() {
         const contractFactory = await hre.ethers.getContractFactory(contractArtifact.contractName);
         // Deploy the contract
         let contract = undefined
-        if (contractArtifact.abi[0].stateMutability === 'nonpayable') {
+        if(file.includes("ConvertibleMark")) {
             contract = await contractFactory.deploy();
+            convertibleMarkAddress = contract.address;
+        } else if (file.includes("LoanWithdraw")) {
+            contract = await contractFactory.deploy(convertibleMarkAddress);
         } else {
-            contract = await contractFactory.deploy(unlockTime, { value: lockedAmount });
+            contract = await contractFactory.deploy();
         }
 
-        // Wait for the contract to be deployed
         await contract.deployed();
         console.log(`${contractArtifact.contractName} deployed at ${contract.address}`);
 
