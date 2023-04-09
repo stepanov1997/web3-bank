@@ -16,12 +16,12 @@ export async function getLtvRatio() {
 
 export async function convertEthsToKm(value) {
     const contract = retrieveContract();
-    return Number(await contract.convertEthsToConvertibleMarks(value));
+    return fromAdaptedNumber(await contract.convertEthsToConvertibleMarks(value));
 }
 
 export async function convertKmsToEth(value) {
     const contract = retrieveContract();
-    return Number(await contract.convertConvertibleMarksToEths(value));
+    return fromAdaptedNumber(await contract.convertConvertibleMarksToEths(value));
 }
 
 export async function getLoan(address) {
@@ -29,9 +29,25 @@ export async function getLoan(address) {
     return fromAdaptedNumber(await contract.loans(address));
 }
 
+export async function getInterestRate() {
+    const contract = retrieveContract();
+    return Number(await contract.interestRate());
+}
+
 export async function getCollateral(address) {
     const contract = retrieveContract();
     return fromAdaptedNumber(await contract.collateral(address));
+}
+
+export async function repay(amount) {
+    const provider = getMetamaskProvider()
+    const signer = provider.getSigner()
+    let contract = createContract();
+    contract = contract.connect(signer);
+    const transactionHash = await contract.repay(adaptNumber(amount), {
+        gasLimit: 300000
+    });
+    return await provider.waitForTransaction(transactionHash.hash)
 }
 
 export async function lend(loanAmount, collateralAmount) {

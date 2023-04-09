@@ -19,19 +19,18 @@ export const LoanInputForm = () => {
             event.preventDefault();
             setLoading(true)
             let convertedCollateral = await convertEthsToKm(collateral);
-            console.log(convertedCollateral)
             let minimalLtvRatio = await getLtvRatio();
             let calculatedLtvRatio = convertedCollateral / Number(loanValue);
             if(calculatedLtvRatio * 100 < minimalLtvRatio) {
-                setLendMessage(`Nije ok ratio: ${calculatedLtvRatio.toFixed(3)} < ${minimalLtvRatio}`)
+                setLendMessage(`Ratio is not as expected: ${calculatedLtvRatio.toFixed(3)} < ${minimalLtvRatio}`)
                 setLoading(false)
                 return false;
             }
             try {
                 await lend(loanValue, collateral)
                 setLendMessage(`The Loan of ${loanValue} KM is successfully lent.`)
-            }catch (e) {
-                setLendMessage("Error with lending a loan. Message: " + e)
+            } catch (e) {
+                setLendMessage("Error with lending a loan. Message: " + e.message)
             }
             setLoading(false)
             return true;
