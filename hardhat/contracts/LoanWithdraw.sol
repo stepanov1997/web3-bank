@@ -1,6 +1,7 @@
 pragma solidity ^0.8.17;
 
 import "./ConvertibleMark.sol";
+import "hardhat/console.sol";
 
 contract LoanWithdraw {
     uint256 public ethTotalSupply;
@@ -17,10 +18,12 @@ contract LoanWithdraw {
         convertibleMarkContract = ConvertibleMark(_convertibleMarkContract);
         convertibleMarkContract.mint(address(this), 200_000);
         maxLoan = 1_000_000;
+        ethTotalSupply = 120_440_000;
         LTV = 80; // 80% as 80 * 10^18
     }
 
-    function lend(uint256 _loanAmount, uint256 _collateralAmount) public {
+    function lend(uint256 _loanAmount) public payable {
+        uint256 _collateralAmount = msg.value;
         require(_loanAmount <= maxLoan, "Loan amount exceeds the maximum limit");
         require(loans[msg.sender] == 0, "User already has an existing loan");
         require(_collateralAmount >= convertConvertibleMarksToEths(_loanAmount) * LTV / (10**18), "Collateral amount is insufficient");
@@ -30,14 +33,21 @@ contract LoanWithdraw {
         require(balance >= _loanAmount, "This contract does not have enough KM to lend");
         loans[msg.sender] = _loanAmount;
         collateral[msg.sender] = _collateralAmount;
-        convertConvertibleMarksToEths(_loanAmount);
-        payable(msg.sender).transfer(_loanAmount);
+        convertibleMarkContract.transferFrom(address(this), msg.sender, _loanAmount);
+
+        payable(msg.sender).transfer(_collateralAmount);
     }
 
     function repay(uint256 _repaymentAmount) public {
         require(loans[msg.sender] >= _repaymentAmount, "Repayment amount exceeds loan amount");
         loans[msg.sender] -= _repaymentAmount;
         convertibleMarkContract.transferFrom(msg.sender, address(this), _repaymentAmount);
+        if(loans[msg.sender] <= 0) {
+            delete loans[msg.sender];
+            address payable contractAddress = payable(address(this));
+            contractAddress.transfer(collateral[msg.sender]);
+            delete collateral[msg.sender];
+        }
     }
 
     function liquidate(address payable _user) public onlyOwner {
@@ -68,12 +78,22 @@ contract LoanWithdraw {
     }
 
     // Converters
-    function convertConvertibleMarksToEths(uint256 _amountInConvertibleMarks) private view returns (uint256) {
+    function convertConvertibleMarksToEths(uint256 _amountInConvertibleMarks) public view returns (uint256) {
+        console.log("csd1=%s",_amountInConvertibleMarks);
         uint256 totalSupply = convertibleMarkContract.totalSupply();
+        console.log("csd1:totalsupply=%s",totalSupply);
+        console.log("csd1:converted=%s",_amountInConvertibleMarks*ethTotalSupply);
+        console.log("csd1:ethTotalSupply=%s",ethTotalSupply);
+        console.log("csd1:convertedAndDivided=%s",_amountInConvertibleMarks*ethTotalSupply/totalSupply);
         return _amountInConvertibleMarks * ethTotalSupply / totalSupply;
     }
-    function convertEthsToConvertibleMarks(uint256 _amountInEths) private view returns (uint256) {
+    function convertEthsToConvertibleMarks(uint256 _amountInEths) public view returns (uint256) {
+        console.log("csd2=%s",_amountInEths);
         uint256 totalSupply = convertibleMarkContract.totalSupply();
+        console.log("csd2:totalsupply=%s",totalSupply);
+        console.log("csd1:ethTotalSupply=%s",ethTotalSupply);
+        console.log("csd2:converted=%s",_amountInEths * ethTotalSupply);
+        console.log("csd2:convertedAndDivided=%s",_amountInEths * ethTotalSupply / totalSupply);
         return _amountInEths * ethTotalSupply / totalSupply;
     }
 

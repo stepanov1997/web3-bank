@@ -28,6 +28,14 @@ export async function balanceOf(address) {
     return fromAdaptedNumber(await contract.balanceOf(address))
 }
 
+export async function totalSupply() {
+    const provider = getMetamaskProvider()
+    const signer = provider.getSigner()
+    let contract = createContract();
+    contract = contract.connect(signer)
+    return await contract.totalSupply()
+}
+
 export async function pastEvents(address) {
     const provider = getMetamaskProvider()
     const signer = provider.getSigner()
