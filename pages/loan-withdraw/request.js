@@ -36,11 +36,10 @@ export default function LoanWithdrawRequestPage() {
 
     // noinspection JSValidateTypes
     return (
-        <div>
-            <div className="ui segment">
-                <div className={styles.container}>
-                    <LoanInputForm/>
-                </div>
+        <div className="ui segment" >
+            <h2>Lend a loan</h2>
+            <div className={styles.container} style={{textAlign: "center"}}>
+                <LoanInputForm/>
             </div>
         </div>
     )

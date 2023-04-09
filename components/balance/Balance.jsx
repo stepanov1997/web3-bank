@@ -2,7 +2,7 @@ import React from "react";
 import {useSelector} from 'react-redux'
 import {selectBalance} from '../../redux-slices/balance-slice'
 import {selectAddress} from "../../redux-slices/address-slice";
-import {Icon, Image, Statistic} from "semantic-ui-react";
+import {Statistic} from "semantic-ui-react";
 
 
 export const Balance = () => {
