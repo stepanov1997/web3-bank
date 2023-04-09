@@ -1,26 +1,39 @@
 import React, {useEffect, useState} from 'react'
 import {Form} from "semantic-ui-react";
 import {convertEthsToKm, getLtvRatio, lend} from "../../core/dao/loan-withdraw-contract/dao";
+import {LoadingSpinner} from "../loading-spinner";
 
 export const LoanInputForm = () => {
+    const [loading, setLoading] = useState(false)
+
     const [loanValue, setLoanValue] = useState(BigInt(0))
     const [loanValueError, setLoanValueError] = useState(undefined)
 
     const [collateral, setCollateral] = useState(BigInt(0))
     const [collateralError, setCollateralError] = useState(undefined)
 
+    const [lendMessage, setLendMessage] = useState(undefined)
+
     return (
         <Form onSubmit={async (event) => {
             event.preventDefault();
+            setLoading(true)
             let convertedCollateral = await convertEthsToKm(collateral);
             console.log(convertedCollateral)
             let minimalLtvRatio = await getLtvRatio();
             let calculatedLtvRatio = convertedCollateral / Number(loanValue);
             if(calculatedLtvRatio * 100 < minimalLtvRatio) {
-                alert(`Nije ok ratio: ${calculatedLtvRatio.toFixed(3)} < ${minimalLtvRatio}`)
+                setLendMessage(`Nije ok ratio: ${calculatedLtvRatio.toFixed(3)} < ${minimalLtvRatio}`)
+                setLoading(false)
                 return false;
             }
-            await lend(loanValue, collateral)
+            try {
+                await lend(loanValue, collateral)
+                setLendMessage(`The Loan of ${loanValue} KM is successfully lent.`)
+            }catch (e) {
+                setLendMessage("Error with lending a loan. Message: " + e)
+            }
+            setLoading(false)
             return true;
         }
         }>
@@ -51,9 +64,12 @@ export const LoanInputForm = () => {
                                 }
                             }}/>
             </Form.Group>
-            <Form.Group widths={5} style={{ display: 'flex', justifyContent: 'center', textAlign: 'center' }}>
-                <Form.Button>Submit</Form.Button>
-            </Form.Group>
+            {!!loading ? <LoadingSpinner/> : (
+                <Form.Group widths={5} style={{ display: 'flex', justifyContent: 'center', textAlign: 'center' }}>
+                    <Form.Button>Submit</Form.Button>
+                </Form.Group>
+            )}
+            <p>{lendMessage ?? ""}</p>
         </Form>
     )
 }

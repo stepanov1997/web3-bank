@@ -45,7 +45,9 @@ const LoanWithdrawCalculatePage = x => {
             const convertedCollateralAmount = await currencyConverter(collateralAmount, collateralCurrency, loanCurrency);
             setCollateralValueInEth(convertedCollateralAmount)
 
-        }catch (e) {}
+        }catch (e) {
+            console.log(e)
+        }
         finally {
             setLoading(false);
             release();

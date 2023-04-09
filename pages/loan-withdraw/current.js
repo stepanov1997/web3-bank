@@ -23,7 +23,7 @@ export default function LoanWithdrawCurrentPage() {
             setLoan(await getLoan(currentAddress));
             setCollateral(await getCollateral(currentAddress));
         })()
-    }, [address, refresh])
+    }, [address, dispatch, refresh])
 
     // noinspection JSValidateTypes
     return (
@@ -34,6 +34,10 @@ export default function LoanWithdrawCurrentPage() {
                 {convertibleMarkLoanBalance(loan)}
                 {ethereumCollateralBalance(collateral)}
             </div>
+            {/*<div style={{textAlign: "center"}}>*/}
+            {/*    <p>Repay the loan: </p><input type={"number"} value={} onChange={event => setRepay()}/> KM<br/>*/}
+            {/*    <button>Repay</button>*/}
+            {/*</div>*/}
         </div>
 
     )
