@@ -1,5 +1,6 @@
 import {getMetamaskProvider} from "../provider/provider";
 import createContract from "../loan-withdraw-contract/contract";
+import {adaptNumber, fromAdaptedNumber} from "../../convertibleMarkParser";
 
 function retrieveContract() {
     const provider = getMetamaskProvider()
@@ -25,15 +26,22 @@ export async function convertKmsToEth(value) {
 
 export async function getLoan(address) {
     const contract = retrieveContract();
-    return Number(await contract.loans(address));
+    return fromAdaptedNumber(await contract.loans(address));
 }
 
 export async function getCollateral(address) {
     const contract = retrieveContract();
-    return Number(await contract.collateral(address));
+    return fromAdaptedNumber(await contract.collateral(address));
 }
 
 export async function lend(loanAmount, collateralAmount) {
-    const contract = retrieveContract();
-    await contract.lend(loanAmount, { value: collateralAmount, gasLimit: 30000000 });
+    const provider = getMetamaskProvider()
+    const signer = provider.getSigner()
+    let contract = createContract();
+    contract = contract.connect(signer);
+    const transactionHash = await contract.lend(adaptNumber(loanAmount), {
+        value: adaptNumber(collateralAmount),
+        // gasLimit: 30000000
+    });
+    return await provider.waitForTransaction(transactionHash.hash)
 }
