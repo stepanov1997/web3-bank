@@ -39,9 +39,9 @@ export default function HomeHistoryPage() {
             {event.type === senderOrReceiver ? (
                 <Icon color='green' name='checkmark' size='large'/>
             ) : (
-                <snap style={{color: calculateColor(event), fontWeight: 'bold'}}>
+                <span style={{color: calculateColor(event), fontWeight: 'bold'}}>
                     {receiverOrSenderAddress}
-                </snap>
+                </span>
             )}
         </>;
     }

@@ -50,7 +50,7 @@ export const Mint = () => {
         <form onSubmit={async event => await mint(event)}>
             <h3>Ovo treba obrisati, jer nema smisla da postoji.</h3>
             <p>Mint KM for account:</p>
-            <input type={"number"} value={mintAmount.toString()}
+            <input type={"number"} value={mintAmount}
                    onChange={e => setMintAmount(e.target.value)}/>
             <input type={"submit"} value={"Mint money"}/>
             {loading === 'mint' ? <LoadingSpinner/> : ""}

@@ -12,4 +12,9 @@ contract ConvertibleMark is ERC20 {
     function mint(address to, uint256 amount) public {
         _mint(to, amount);
     }
+
+    function approve(address from, address to, uint256 amount) public returns (bool) {
+        _approve(from, to, amount);
+        return true;
+    }
 }

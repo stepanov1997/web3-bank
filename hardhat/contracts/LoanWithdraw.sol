@@ -10,24 +10,23 @@ contract LoanWithdraw {
     mapping(address => uint256) public loans;
     mapping(address => uint256) public collateral;
     uint256 public LTV;
-//    uint256 public interestRate;
+    uint256 public interestRate;
     uint256 public maxLoan;
 
     constructor(address _convertibleMarkContract) public {
         owner = payable(msg.sender);
         convertibleMarkContract = ConvertibleMark(_convertibleMarkContract);
-        convertibleMarkContract.mint(address(this), 200_000 * 10**18);
-        maxLoan = 1_000_000 * 10**18;
+        convertibleMarkContract.mint(address(this), 200_000 * 10 ** 18);
+        maxLoan = 1_000_000 * 10 ** 18;
         ethTotalSupply = 120_440_000;
-        LTV = 80; // 80% as 80 * 10^18
+        interestRate = 3;
+        LTV = 80;
+        // 80% as 80 * 10^18
     }
 
     function lend(uint256 _loanAmount) public payable {
         require(_loanAmount <= maxLoan, "Loan amount exceeds the maximum limit");
-        console.log("Loan amount: ", _loanAmount);
-        console.log("First: ", convertEthsToConvertibleMarks(msg.value) * 100);
-        console.log("Second: ", LTV * _loanAmount);
-        require(convertEthsToConvertibleMarks(msg.value) * 100 >= LTV * _loanAmount, "Collateral amount is insufficient");
+        require(convertEthsToConvertibleMarks(msg.value) * 100 >= LTV * _loanAmount * 10**18, "Collateral amount is insufficient");
         require(msg.sender.balance >= msg.value, "Sender does not have enough collateral to lend");
 
         uint256 balance = convertibleMarkContract.balanceOf(address(this));
@@ -37,31 +36,37 @@ contract LoanWithdraw {
         convertibleMarkContract.transfer(msg.sender, _loanAmount);
     }
 
-    function repay(uint256 _repaymentAmount) public {
+    function repay(uint256 _repaymentAmount) public returns (bool) {
+        uint256 repaymentAmountWithInterestedRate = _repaymentAmount * (100 + interestRate) / 100;
         require(loans[msg.sender] >= _repaymentAmount, "Repayment amount exceeds loan amount");
         loans[msg.sender] -= _repaymentAmount;
         uint256 balance = convertibleMarkContract.balanceOf(msg.sender);
-        require(balance >= _repaymentAmount, "There is no enough money.");
-        convertibleMarkContract.transferFrom(msg.sender, address(this), _repaymentAmount);
-        if(loans[msg.sender] <= 0) {
+        require(balance >= repaymentAmountWithInterestedRate, "There is no enough money.");
+
+        bool approvalSuccess = convertibleMarkContract.approve(msg.sender, address(this), repaymentAmountWithInterestedRate);
+        require(approvalSuccess, "Approval failed");
+        bool transferSuccess = convertibleMarkContract.transferFrom(msg.sender, address(this), repaymentAmountWithInterestedRate);
+        require(transferSuccess, "Transfer failed");
+        if (loans[msg.sender] <= 0) {
             delete loans[msg.sender];
             bool sent = payable(msg.sender).send(collateral[msg.sender]);
             require(sent, 'Failed to send Ether');
             delete collateral[msg.sender];
+            return true;
         }
+        return false;
     }
 
     function liquidate(address payable _user) public onlyOwner {
         require(msg.sender == owner, "Only owner can liquidate");
-        require(loans[_user] >= convertEthsToConvertibleMarks(collateral[_user]) * (1 - LTV / 100), "Loan amount is less than the liquidation threshold");
+        require(loans[_user] * 10**18 <= convertEthsToConvertibleMarks(collateral[_user]) * (100 - LTV) / 100 , "Loan amount is less than the liquidation threshold");
         delete collateral[_user];
         delete loans[_user];
     }
 
-    // Setters
-//    function setInterestRate(uint256 _interestRate) public onlyOwner {
-//        interestRate = _interestRate;
-//    }
+    function setInterestRate(uint256 _interestRate) public onlyOwner {
+        interestRate = _interestRate;
+    }
 
     function setLTV(uint256 _LTV) public onlyOwner {
         require(_LTV < 100, 'LTV should be between 0 and 100');
@@ -72,18 +77,19 @@ contract LoanWithdraw {
         maxLoan = _maxLoan;
     }
 
-    function setEthTotalSupply(uint256 _ethTotalSupply) public  onlyOwner{
+    function setEthTotalSupply(uint256 _ethTotalSupply) public onlyOwner {
         ethTotalSupply = _ethTotalSupply;
     }
 
     // Converters
     function convertConvertibleMarksToEths(uint256 _amountInConvertibleMarks) public view returns (uint256) {
         uint256 totalSupply = convertibleMarkContract.totalSupply();
-        return _amountInConvertibleMarks * totalSupply / (ethTotalSupply * 10**18);
+        return _amountInConvertibleMarks * totalSupply / ethTotalSupply;
     }
+
     function convertEthsToConvertibleMarks(uint256 _amountInEths) public view returns (uint256) {
         uint256 totalSupply = convertibleMarkContract.totalSupply();
-        return _amountInEths * ethTotalSupply * 10**18 / totalSupply;
+        return (_amountInEths * ethTotalSupply * 10 ** 36) / totalSupply;
     }
 
     // modifiers
