@@ -12,8 +12,6 @@ async function main() {
     const currentTimestampInSeconds = Math.round(Date.now() / 1000);
     const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
     const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
-
-    const lockedAmount = hre.ethers.utils.parseEther("1");
     const contractFiles = fs.readdirSync('./contracts');
 
     let convertibleMarkAddress = undefined
@@ -29,7 +27,7 @@ async function main() {
         if(file.includes("ConvertibleMark")) {
             contract = await contractFactory.deploy();
             convertibleMarkAddress = contract.address;
-        } else if (file.includes("LoanWithdraw")) {
+        } else if (file.includes("LoanWithdraw") || file.includes("Savings")) {
             contract = await contractFactory.deploy(convertibleMarkAddress);
         } else {
             contract = await contractFactory.deploy();

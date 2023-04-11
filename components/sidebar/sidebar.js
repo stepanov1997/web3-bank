@@ -95,14 +95,6 @@ export default function MySidebar({children}) {
                         <Icon name='box'/>
                         Show current savings
                     </Menu.Item>
-                    <Menu.Item as='a' link={true} href={'/savings/save'}>
-                        <Icon name='upload'/>
-                        Save a crypto money
-                    </Menu.Item>
-                    <Menu.Item as='a' link={true} href={'/savings/take'}>
-                        <Icon name='download'/>
-                        Take saved crypto money
-                    </Menu.Item>
                     <Menu.Item as='a' link={true} href={'/savings/calculate'}>
                         <Icon name='calculator'/>
                         Calculate interesting savings
