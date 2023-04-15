@@ -35,11 +35,40 @@ export async function withdraw(savingAmount) {
     return await provider.waitForTransaction(transactionHash.hash)
 }
 
-export async function earnInterest() {
+export async function getInterestedRate() {
     const provider = getMetamaskProvider()
     const signer = provider.getSigner()
     let contract = createContract();
     contract = contract.connect(signer);
-    const transactionHash = await contract.earnInterest()
-    return await provider.waitForTransaction(transactionHash.hash)
+    return Number(await contract.interestRate());
+}
+
+export async function pastDepositEvents(address) {
+    const provider = getMetamaskProvider()
+    const signer = provider.getSigner()
+    let contract = createContract();
+    contract = contract.connect(signer);
+
+    const filter = contract.filters.Deposit(null, address, null);
+    return await contract.queryFilter(filter, 0, 'latest');
+}
+
+export async function pastWithdrawEvents(address) {
+    const provider = getMetamaskProvider()
+    const signer = provider.getSigner()
+    let contract = createContract();
+    contract = contract.connect(signer);
+
+    const filter = contract.filters.Withdraw(null, address, null);
+    return await contract.queryFilter(filter, 0, 'latest');
+}
+
+export async function pastInterestEvents(address) {
+    const provider = getMetamaskProvider()
+    const signer = provider.getSigner()
+    let contract = createContract();
+    contract = contract.connect(signer);
+
+    const filter = contract.filters.Interest(null, address, null);
+    return await contract.queryFilter(filter, 0, 'latest');
 }

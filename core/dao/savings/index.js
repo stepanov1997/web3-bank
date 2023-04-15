@@ -1,3 +1,3 @@
-import {deposit,withdraw,savings,earnInterest} from './dao'
+import {deposit,withdraw,savings,getInterestedRate} from './dao'
 
-export default {deposit, withdraw, savings, earnInterest}
+export default {deposit, withdraw, savings, getInterestedRate}
