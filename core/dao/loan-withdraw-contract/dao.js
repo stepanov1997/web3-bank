@@ -61,3 +61,33 @@ export async function lend(loanAmount, collateralAmount) {
     });
     return await provider.waitForTransaction(transactionHash.hash)
 }
+
+export async function pastLendEvents(address) {
+    const provider = getMetamaskProvider()
+    const signer = provider.getSigner()
+    let contract = createContract();
+    contract = contract.connect(signer);
+
+    const filter = contract.filters.Lend(null, address, null, null);
+    return await contract.queryFilter(filter, 0, 'latest');
+}
+
+export async function pastLiquidateEvents(address) {
+    const provider = getMetamaskProvider()
+    const signer = provider.getSigner()
+    let contract = createContract();
+    contract = contract.connect(signer);
+
+    const filter = contract.filters.Liquidate(null, null, address, null);
+    return await contract.queryFilter(filter, 0, 'latest');
+}
+
+export async function pastRepayEvents(address) {
+    const provider = getMetamaskProvider()
+    const signer = provider.getSigner()
+    let contract = createContract();
+    contract = contract.connect(signer);
+
+    const filter = contract.filters.Repay(null, address, null, null);
+    return await contract.queryFilter(filter, 0, 'latest');
+}

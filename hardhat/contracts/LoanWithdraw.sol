@@ -13,6 +13,10 @@ contract LoanWithdraw {
     uint256 public interestRate;
     uint256 public maxLoan;
 
+    event Lend(address indexed contractAddress, address indexed userAddress, uint256 loanAmount, uint256 collateralAmount);
+    event Repay(address indexed contractAddress, address indexed userAddress, uint256 currentLoans, uint256 repayAmount);
+    event Liquidate(address indexed contractAddress, address indexed owner, address indexed userAddress, uint256 currentLoans);
+
     constructor(address _convertibleMarkContract) public {
         owner = payable(msg.sender);
         convertibleMarkContract = ConvertibleMark(_convertibleMarkContract);
@@ -34,6 +38,7 @@ contract LoanWithdraw {
         loans[msg.sender] += _loanAmount;
         collateral[msg.sender] += msg.value;
         convertibleMarkContract.transfer(msg.sender, _loanAmount);
+        emit Lend(address(this), msg.sender, _loanAmount, msg.value);
     }
 
     function repay(uint256 _repaymentAmount) public returns (bool) {
@@ -47,19 +52,25 @@ contract LoanWithdraw {
         require(approvalSuccess, "Approval failed");
         bool transferSuccess = convertibleMarkContract.transferFrom(msg.sender, address(this), repaymentAmountWithInterestedRate);
         require(transferSuccess, "Transfer failed");
-        if (loans[msg.sender] <= 0) {
-            delete loans[msg.sender];
-            bool sent = payable(msg.sender).send(collateral[msg.sender]);
-            require(sent, 'Failed to send Ether');
-            delete collateral[msg.sender];
-            return true;
+
+        emit Repay(address(this), msg.sender, loans[msg.sender], _repaymentAmount);
+
+        if (loans[msg.sender] > 0) {
+            return false;
         }
-        return false;
+        delete loans[msg.sender];
+        bool sent = payable(msg.sender).send(collateral[msg.sender]);
+        require(sent, 'Failed to send Ether');
+        delete collateral[msg.sender];
+        return true;
     }
 
     function liquidate(address payable _user) public onlyOwner {
         require(msg.sender == owner, "Only owner can liquidate");
-        require(loans[_user] * 10**18 <= convertEthsToConvertibleMarks(collateral[_user]) * (100 - LTV) / 100 , "Loan amount is less than the liquidation threshold");
+        uint256 loan = loans[_user] * 10**18;
+        uint256 liquidityThreshold = convertEthsToConvertibleMarks(collateral[_user]) * (100 - LTV) / 100;
+        require(loan >= liquidityThreshold, "Loan amount is less than the liquidation threshold.");
+        emit Liquidate(address(this), owner, _user, collateral[_user]);
         delete collateral[_user];
         delete loans[_user];
     }

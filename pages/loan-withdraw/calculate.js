@@ -11,17 +11,17 @@ import useAsyncSemaphore from "../../util/semaphore";
 
 // Konverzija valute
 const currencyConverter = async (amount, fromCurrency, toCurrency) => {
-    if(fromCurrency==='KM' && toCurrency==='ETH') {
+    if (fromCurrency === 'KM' && toCurrency === 'ETH') {
         return await convertKmsToEth(amount)
     }
-    if(fromCurrency==='ETH' && toCurrency==='KM') {
+    if (fromCurrency === 'ETH' && toCurrency === 'KM') {
         return await convertEthsToKm(amount)
     }
     return new Promise((resolve, reject) => reject("Unsupported currency..."))
 };
 
 const LoanWithdrawCalculatePage = x => {
-    const { acquire, release } = useAsyncSemaphore();
+    const {acquire, release} = useAsyncSemaphore();
 
     const [collateralAmount, setCollateralAmount] = useState(0);
     const [collateralCurrency, setCollateralCurrency] = useState('ETH');
@@ -34,7 +34,7 @@ const LoanWithdrawCalculatePage = x => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        (async function() {
+        (async function () {
             await handleSubmit();
         })()
     }, [loanAmount, collateralAmount])
@@ -60,22 +60,21 @@ const LoanWithdrawCalculatePage = x => {
             const interestRate = await getInterestRate();
             setInterestRate(interestRate)
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
-        }
-        finally {
+        } finally {
             setLoading(false);
             release();
         }
     };
 
-    const total = loanAmount * (100+interestRate)/100;
+    const total = loanAmount * (100 + interestRate) / 100;
 
-    const collateralDownLimit = loanAmountValueInEth*(expectedLtvRatio)/100;
+    const collateralDownLimit = loanAmountValueInEth * (expectedLtvRatio) / 100;
     const collateralUpLimit = loanAmountValueInEth;
 
     const loanDownLimit = collateralValueInKm;
-    const loanUpLimit = collateralValueInKm*(200-expectedLtvRatio)/100;
+    const loanUpLimit = collateralValueInKm * (200 - expectedLtvRatio) / 100;
 
     const loanValidation = (loanAmount >= loanDownLimit && loanAmount <= loanUpLimit)
         ? (<span>
@@ -110,11 +109,11 @@ const LoanWithdrawCalculatePage = x => {
                         control={Select}
                         label="Loan Currency"
                         options={[
-                            { key: 'KM', text: 'KM', value: 'KM' },
+                            {key: 'KM', text: 'KM', value: 'KM'},
                         ]}
                         value={'KM'}
                         disabled={true}
-                        onChange={(e, { value }) => setLoanCurrency(value)}
+                        onChange={(e, {value}) => setLoanCurrency(value)}
                     />
                 </Form.Group>
                 <Form.Group widths="equal">
@@ -130,34 +129,37 @@ const LoanWithdrawCalculatePage = x => {
                     <Form.Field control={Select}
                                 label="Collateral Currency"
                                 options={[
-                                    { key: 'ETH', text: 'ETH', value: 'ETH' }
+                                    {key: 'ETH', text: 'ETH', value: 'ETH'}
                                 ]}
                                 value={'ETH'}
                                 disabled={true}
-                                onChange={(e, { value }) => setCollateralCurrency(value)}
+                                onChange={(e, {value}) => setCollateralCurrency(value)}
                     />
                 </Form.Group>
             </Form>
-            <br />
-            {loading && <Loader active inline="centered" />}
+            <br/>
+            {loading && <Loader active inline="centered"/>}
             {collateralValueInKm !== 0 && (
                 <div style={{textAlign: "center"}}>
                     <h3>Loan Details:</h3>
                     <hr/>
                     <p>
-                        Collateral Amount: {collateralAmount} {collateralCurrency} (<b>{collateralValueInKm} {loanCurrency}</b>)
+                        Collateral
+                        Amount: {collateralAmount} {collateralCurrency} (<b>{collateralValueInKm} {loanCurrency}</b>)
                     </p>
                     <p>
-                        Allowed loan range: <b>{loanDownLimit}</b> - <b>{loanUpLimit} {loanCurrency}</b>   (LTV: {expectedLtvRatio}%)
+                        Allowed loan
+                        range: <b>{loanDownLimit}</b> - <b>{loanUpLimit} {loanCurrency}</b> (LTV: {expectedLtvRatio}%)
                     </p>
                     <p>
-                        Allowed collateral range: <b>{collateralDownLimit}</b> - <b>{collateralUpLimit} {collateralCurrency}</b>   (LTV: {expectedLtvRatio}%)
+                        Allowed collateral
+                        range: <b>{collateralDownLimit}</b> - <b>{collateralUpLimit} {collateralCurrency}</b> (LTV: {expectedLtvRatio}%)
                     </p>
                     <p>Loan Amount: {loanAmount} {loanCurrency} {loanValidation}</p>
                     <p>Collateral Amount: {collateralAmount} {collateralCurrency} {collateralValidation}</p>
                     <hr/>
                     <p>Loan Amount: {loanAmount} {loanCurrency}</p>
-                    <p>Interest rate: {loanAmount*(interestRate)/100} {loanCurrency} ({interestRate}%)</p>
+                    <p>Interest rate: {loanAmount * (interestRate) / 100} {loanCurrency} ({interestRate}%)</p>
                     <h4>Total: {total} {loanCurrency}</h4>
                 </div>
             )}
