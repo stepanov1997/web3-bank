@@ -4,7 +4,7 @@ import providerDao from '../../core/dao/provider'
 import {useDispatch, useSelector} from "react-redux";
 import {selectAddress, setAddress} from "../../redux-slices/address-slice";
 import {selectRefresh} from "../../redux-slices/refresh-slice";
-import {Icon, Table} from "semantic-ui-react";
+import {Icon, Segment, Table} from "semantic-ui-react";
 import {fromAdaptedNumber} from "../../core/convertibleMarkParser";
 
 export default function HomeHistoryPage() {
@@ -54,11 +54,11 @@ export default function HomeHistoryPage() {
 
 // noinspection JSValidateTypes
     return (
-        <div>
-            <div className="ui segment">
-                History
-            </div>
-            <div className="ui segment">
+        <div style={{textAlign: 'center'}} >
+            <Segment>
+                <h3>Transaction history</h3>
+            </Segment>
+            <Segment>
                 <Table celled structured>
                     <Table.Header>
                         <Table.Row textAlign='center'>
@@ -88,7 +88,7 @@ export default function HomeHistoryPage() {
                         ))
                     }</Table.Body>
                 </Table>
-            </div>
+            </Segment>
         </div>
     )
 }

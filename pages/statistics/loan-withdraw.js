@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {pastLendEvents, pastLiquidateEvents, pastRepayEvents} from "../../core/dao/loan-withdraw-contract/dao";
 import {StatisticBar} from "../../components/statistic-bar/statistic-bar";
+import {Segment} from "semantic-ui-react";
 
 export const StatisticsLoanWithdrawPage = () => {
 
@@ -21,27 +22,35 @@ export const StatisticsLoanWithdrawPage = () => {
         })()
     }, [])
 
-    return <div className={"ui scroll"}>
-        <StatisticBar history={lentHistory}
-                      title={"Lent loans"}
-                      addressIndex={1}
-                      dataIndex={2}
-        />
-        <StatisticBar history={lentHistory}
-                      title={"Lent collateral"}
-                      addressIndex={1}
-                      dataIndex={3}
-        />
-        <StatisticBar history={repayHistory}
-                      title={"Repayed loans"}
-                      addressIndex={1}
-                      dataIndex={2}
-        />
-        <StatisticBar history={liquidateHistory}
-                      title={"Liquidated loans"}
-                      addressIndex={2}
-                      dataIndex={3}
-        />
+    return <div style={{textAlign: 'center'}}>
+        <Segment>
+            <StatisticBar history={lentHistory}
+                          title={"Lent loans"}
+                          addressIndex={1}
+                          dataIndex={2}
+            />
+        </Segment>
+        <Segment>
+            <StatisticBar history={lentHistory}
+                          title={"Lent collateral"}
+                          addressIndex={1}
+                          dataIndex={3}
+            />
+        </Segment>
+        <Segment>
+            <StatisticBar history={repayHistory}
+                          title={"Repayed loans"}
+                          addressIndex={1}
+                          dataIndex={2}
+            />
+        </Segment>
+        <Segment>
+            <StatisticBar history={liquidateHistory}
+                          title={"Liquidated loans"}
+                          addressIndex={2}
+                          dataIndex={3}
+            />
+        </Segment>
     </div>;
 }
 

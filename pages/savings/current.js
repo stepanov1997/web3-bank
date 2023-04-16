@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Header, Segment, Grid, Button, Input } from 'semantic-ui-react';
+import {useState, useEffect} from 'react';
+import {Header, Segment, Grid, Button, Input} from 'semantic-ui-react';
 import {deposit, savings, withdraw} from "../../core/dao/savings/dao";
 import {useDispatch, useSelector} from "react-redux";
 import {executeRefresh, selectRefresh} from "../../redux-slices/refresh-slice";
@@ -19,7 +19,7 @@ export default function SavingsCurrentPage() {
     const userBalance = useSelector(selectBalance);
 
     useEffect(() => {
-        (async function() {
+        (async function () {
             try {
                 const currentAddress = await providerDao.currentAddress();
                 const balance = await balanceOf(currentAddress)
@@ -77,34 +77,40 @@ export default function SavingsCurrentPage() {
     };
 
     return (
-        <Segment raised>
-            <Header as="h2">Savings Account</Header>
-            <Grid columns={2} stackable>
-                <Grid.Row>
-                    <Grid.Column>
-                        <Header as="h4">Your Balance</Header>
-                        <p>{savedBalance} KM</p>
-                        <p>{userBalance} KM</p>
-                    </Grid.Column>
-                    <Grid.Column>
-                        <Header as="h4">Actions</Header>
-                        <Input
-                            label="Deposit Amount"
-                            value={depositAmount}
-                            onChange={(e) => setDepositAmount(e.target.value)}
-                            placeholder="Enter amount"
-                        />
-                        <Button onClick={handleDeposit}>Deposit</Button>
-                        <Input
-                            label="Withdraw Amount"
-                            value={withdrawAmount}
-                            onChange={(e) => setWithdrawAmount(e.target.value)}
-                            placeholder="Enter amount"
-                        />
-                        <Button onClick={handleWithdraw}>Withdraw</Button>
-                    </Grid.Column>
-                </Grid.Row>
-            </Grid>
-        </Segment>
+        <div style={{textAlign: 'center'}}>
+            <Segment>
+                <Header as="h2">Savings Account</Header>
+            </Segment>
+            <Segment raised>
+                <Grid columns={2} stackable>
+                    <Grid.Row>
+                        <Grid.Column>
+                            <Header as="h4">Your Balance</Header>
+                            <p>Savings balance: {savedBalance} KM</p>
+                            <p>User balance: {userBalance} KM</p>
+                        </Grid.Column>
+                        <Grid.Column>
+                            <Header as="h4">Actions</Header>
+                            <br/>
+                            <Input
+                                label="Deposit Amount"
+                                value={depositAmount}
+                                onChange={(e) => setDepositAmount(e.target.value)}
+                                placeholder="Enter amount"
+                            /><br/><br/>
+                            <Button onClick={handleDeposit}>Deposit</Button>
+                            <br/><br/><br/>
+                            <Input
+                                label="Withdraw Amount"
+                                value={withdrawAmount}
+                                onChange={(e) => setWithdrawAmount(e.target.value)}
+                                placeholder="Enter amount"
+                            /><br/><br/>
+                            <Button onClick={handleWithdraw}>Withdraw</Button>
+                        </Grid.Column>
+                    </Grid.Row>
+                </Grid>
+            </Segment>
+        </div>
     );
 }

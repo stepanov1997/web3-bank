@@ -7,6 +7,7 @@ import {setBalance} from '../../redux-slices/balance-slice'
 import {selectAddress, setAddress} from "../../redux-slices/address-slice";
 import {selectRefresh} from "../../redux-slices/refresh-slice";
 import {LoanInputForm} from "../../components/loan-input-form/LoanInputForm";
+import {Segment} from "semantic-ui-react";
 
 export default function LoanWithdrawRequestPage() {
 
@@ -36,11 +37,13 @@ export default function LoanWithdrawRequestPage() {
 
     // noinspection JSValidateTypes
     return (
-        <div className="ui segment" >
-            <h2>Lend a loan</h2>
-            <div className={styles.container} style={{textAlign: "center"}}>
+        <div style={{textAlign: "center"}}>
+            <Segment>
+                <h2>Lend a loan</h2>
+            </Segment>
+            <Segment className={styles.container}>
                 <LoanInputForm/>
-            </div>
+            </Segment>
         </div>
     )
 }

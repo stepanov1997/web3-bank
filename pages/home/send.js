@@ -34,10 +34,8 @@ export default function HomeSendPage() {
 
     // noinspection JSValidateTypes
     return (
-        <div>
-            <div className="ui segment">
-                <SendTransaction/>
-            </div>
+        <div style={{textAlign: 'center'}} >
+            <SendTransaction/>
         </div>
     )
 }

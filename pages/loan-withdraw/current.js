@@ -4,7 +4,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {selectAddress, setAddress} from "../../redux-slices/address-slice";
 import {executeRefresh, selectRefresh} from "../../redux-slices/refresh-slice";
 import {getCollateral, getLoan, getInterestRate, repay} from "../../core/dao/loan-withdraw-contract/dao";
-import {Form, Statistic} from "semantic-ui-react";
+import {Button, Form, Input, Segment, Statistic} from "semantic-ui-react";
 import Image from "next/image";
 import {balanceOf} from "../../core/dao/convertible-mark-contract/dao";
 
@@ -18,7 +18,7 @@ export default function LoanWithdrawCurrentPage() {
     const refresh = useSelector(selectRefresh);
     const address = useSelector(selectAddress);
 
-    const onSubmit = async (event) => {
+    const onClick = async (event) => {
         event.preventDefault()
         const balance = await balanceOf(address);
         if (repayValue > balance) {
@@ -26,10 +26,7 @@ export default function LoanWithdrawCurrentPage() {
             return false;
         }
         const interestRate = await getInterestRate();
-        console.log(interestRate)
-        console.log(repayValue)
         const repayValueWithInterestRate = repayValue * (100 + interestRate) / 100;
-        console.log(repayValueWithInterestRate)
         if (repayValueWithInterestRate > balance) {
             alert(`You don't have enough money to pay interest rate (${repayValueWithInterestRate - balance})`)
             return false;
@@ -61,25 +58,29 @@ export default function LoanWithdrawCurrentPage() {
 
     // noinspection JSValidateTypes
     return (
-        <div className="ui segment">
-            <h2>Loan Status</h2>
-            <div style={{textAlign: "center"}}>
-                <p>{address}</p>
-                {convertibleMarkLoanBalance(loan)}
-                {ethereumCollateralBalance(collateral)}
-            </div>
-            <Form onSubmit={onSubmit} style={{textAlign: "center", marginTop: "80px"}}>
-                <p>Repay the loan: </p>
-                <Form.Group style={{textAlign: "center"}}>
-                    <Form.Input type={"number"}
-                                value={repayValue}
-                                onChange={event => setRepayValue(event.target.value)}/>
-                </Form.Group>
-                <Form.Group style={{textAlign: "center"}}>
-                    <Form.Input type="submit" value="Repay"/>KM
-                </Form.Group>
-            </Form>
+        <div style={{textAlign: "center"}}>
+            <Segment>
+                <h2>Loan Status</h2>
+            </Segment>
+            <Segment>
+                <div>
+                    <p>{address}</p>
+                    {convertibleMarkLoanBalance(loan)}
+                    {ethereumCollateralBalance(collateral)}
+                </div>
+            </Segment>
+            <Segment>
+                <div>
+                    <p>Repay the loan: </p>
+                    <Input type={"number"}
+                           value={repayValue}
+                           onChange={event => setRepayValue(event.target.value)}/> KM
+                    <br/><br/>
+                    <Button onClick={onClick}>Repay</Button>
+                </div>
+            </Segment>
         </div>
+
 
     )
 }

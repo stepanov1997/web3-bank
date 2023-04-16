@@ -19,10 +19,10 @@ function exampleReducer(state, action) {
 export default function MySidebar({children}) {
     const {pathname} = useRouter()
     const [state, dispatch] = React.useReducer(exampleReducer, {
-        animation: 'push',
+        animation: 'overlay',
         direction: 'left',
         dimmed: false,
-        visible: true,
+        visible: false,
     })
     const { animation, dimmed, direction, visible } = state
 
@@ -131,18 +131,16 @@ export default function MySidebar({children}) {
     }
 
     return (
-        <div style={{height: '100%'}}>
+        <div>
             <Button
                 onClick={() =>
-                    dispatch({ type: 'CHANGE_ANIMATION', animation: 'push' })
+                    dispatch({ type: 'CHANGE_ANIMATION', animation: 'overlay' })
                 }
             >
-                Scale Down
+            {visible ? "Hide menu" : "Show menu"}
             </Button>
-            <Sidebar.Pushable as={Segment} style={{ overflow: 'hidden', height: '100%' }}>
-                {
-                    fillSidebar()
-                }
+            <Sidebar.Pushable as={Segment}>
+                {fillSidebar()}
                 <Sidebar.Pusher dimmed={dimmed && visible}>
                     <Segment basic>
                         {children}

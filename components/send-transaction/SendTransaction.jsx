@@ -4,6 +4,7 @@ import convertibleMarkDao from "../../core/dao/convertible-mark-contract";
 import {useDispatch, useSelector} from "react-redux";
 import {selectBalance} from "../../redux-slices/balance-slice";
 import {executeRefresh} from "../../redux-slices/refresh-slice";
+import {Form, Input, Segment} from "semantic-ui-react";
 
 
 export const SendTransaction = () => {
@@ -39,13 +40,21 @@ export const SendTransaction = () => {
     }
 
     return (
-        <form onSubmit={async event => await sendTransaction(event)}>
-            <p>Send crypto KM to wallet:</p>
-            <input type={"text"} value={receiverAddress} onChange={e => setReceiverAddress(e.target.value)}/>
-            <input type={"number"} value={receiverAmount}
-                   onChange={e => setReceiverAmount(e.target.value)}/>
-            <input type={"submit"} value={"Send money"}/>
-            {loading ? <LoadingSpinner/> : ""}
-        </form>
+        <>
+            <Segment>
+                <h3>Send crypto KM to wallet:</h3>
+            </Segment>
+            <Segment>
+                <Form onSubmit={async event => await sendTransaction(event)}>
+                    Receiver address: <Input type={"text"} value={receiverAddress}
+                                             onChange={e => setReceiverAddress(e.target.value)}/><br/>
+                    Amount: <Input type={"number"} value={receiverAmount}
+                                   onChange={e => setReceiverAmount(e.target.value)}/> KM<br/><br/>
+                    <Input type={"submit"} value={"Send money"}/><br/>
+                    {loading ? <LoadingSpinner/> : ""}
+                </Form>
+            </Segment>
+        </>
+
     )
 }
