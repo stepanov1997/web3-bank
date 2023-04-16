@@ -22,7 +22,7 @@ export const LoanInputForm = () => {
             let minimalLtvRatio = await getLtvRatio();
             let calculatedLtvRatio = convertedCollateral / Number(loanValue);
             if(calculatedLtvRatio * 100 < minimalLtvRatio) {
-                setLendMessage(`Ratio is not as expected: ${calculatedLtvRatio.toFixed(3)} < ${minimalLtvRatio}`)
+                setLendMessage(`Ratio is not as expected: ${calculatedLtvRatio.toFixed(3)*100}% < ${minimalLtvRatio}%`)
                 setLoading(false)
                 return false;
             }

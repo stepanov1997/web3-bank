@@ -1,13 +1,12 @@
-import styles from '../../styles/Home.module.css'
 import React, {useEffect} from "react";
 import convertibleMarkDao from '../../core/dao/convertible-mark-contract'
 import providerDao from '../../core/dao/provider'
-import Mint from "../../components/mint";
 import Balance from "../../components/balance";
 import {useDispatch, useSelector} from "react-redux";
 import {setBalance} from '../../redux-slices/balance-slice'
 import {selectAddress, setAddress} from "../../redux-slices/address-slice";
 import {selectRefresh} from "../../redux-slices/refresh-slice";
+import {Segment} from "semantic-ui-react";
 
 export default function HomeBalancePage() {
     const dispatch = useDispatch();
@@ -36,14 +35,13 @@ export default function HomeBalancePage() {
 
     // noinspection JSValidateTypes
     return (
-        <div>
-            <div className="ui segment">
-                <div className={styles.container}>
-                    <Balance/>
-                    <br></br>
-                    <Mint/>
-                </div>
-            </div>
+        <div style={{textAlign: 'center'}}>
+            <Segment>
+                <h3>Account balance</h3>
+            </Segment>
+            <Segment>
+                <Balance/>
+            </Segment>
         </div>
     )
 }

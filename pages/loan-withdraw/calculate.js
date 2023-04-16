@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Form, Input, Select, Button, Loader, Label, Icon} from 'semantic-ui-react';
+import {Form, Input, Select, Button, Loader, Label, Icon, Segment} from 'semantic-ui-react';
 import {
     convertEthsToKm,
     convertKmsToEth,
@@ -92,77 +92,83 @@ const LoanWithdrawCalculatePage = x => {
             <Icon name={"x"}/> (Not in range)
         </span>)
     return (
-        <div className="ui segment">
-            <h2>Loan Calculator</h2>
-            <Form>
-                <Form.Group widths="equal">
-                    <Form.Field
-                        control={Input}
-                        type="number"
-                        label="Loan Amount"
-                        value={loanAmount}
-                        onChange={async (e, {value}) => {
-                            setLoanAmount(value);
-                        }}
-                    />
-                    <Form.Field
-                        control={Select}
-                        label="Loan Currency"
-                        options={[
-                            {key: 'KM', text: 'KM', value: 'KM'},
-                        ]}
-                        value={'KM'}
-                        disabled={true}
-                        onChange={(e, {value}) => setLoanCurrency(value)}
-                    />
-                </Form.Group>
-                <Form.Group widths="equal">
-                    <Form.Field
-                        control={Input}
-                        type="number"
-                        label="Collateral Amount"
-                        value={collateralAmount}
-                        onChange={async (e, {value}) => {
-                            setCollateralAmount(value);
-                        }}
-                    />
-                    <Form.Field control={Select}
-                                label="Collateral Currency"
-                                options={[
-                                    {key: 'ETH', text: 'ETH', value: 'ETH'}
-                                ]}
-                                value={'ETH'}
-                                disabled={true}
-                                onChange={(e, {value}) => setCollateralCurrency(value)}
-                    />
-                </Form.Group>
-            </Form>
-            <br/>
-            {loading && <Loader active inline="centered"/>}
-            {collateralValueInKm !== 0 && (
-                <div style={{textAlign: "center"}}>
-                    <h3>Loan Details:</h3>
-                    <hr/>
-                    <p>
-                        Collateral
-                        Amount: {collateralAmount} {collateralCurrency} (<b>{collateralValueInKm} {loanCurrency}</b>)
-                    </p>
-                    <p>
-                        Allowed loan
-                        range: <b>{loanDownLimit}</b> - <b>{loanUpLimit} {loanCurrency}</b> (LTV: {expectedLtvRatio}%)
-                    </p>
-                    <p>
-                        Allowed collateral
-                        range: <b>{collateralDownLimit}</b> - <b>{collateralUpLimit} {collateralCurrency}</b> (LTV: {expectedLtvRatio}%)
-                    </p>
-                    <p>Loan Amount: {loanAmount} {loanCurrency} {loanValidation}</p>
-                    <p>Collateral Amount: {collateralAmount} {collateralCurrency} {collateralValidation}</p>
-                    <hr/>
-                    <p>Loan Amount: {loanAmount} {loanCurrency}</p>
-                    <p>Interest rate: {loanAmount * (interestRate) / 100} {loanCurrency} ({interestRate}%)</p>
-                    <h4>Total: {total} {loanCurrency}</h4>
-                </div>
-            )}
+        <div style={{textAlign: 'center'}}>
+            <Segment>
+                <h3>Loan Calculator</h3>
+            </Segment>
+            <Segment>
+                <Form>
+                    <Form.Group widths="equal">
+                        <Form.Field
+                            control={Input}
+                            type="number"
+                            label="Loan Amount"
+                            value={loanAmount}
+                            onChange={async (e, {value}) => {
+                                setLoanAmount(value);
+                            }}
+                        />
+                        <Form.Field
+                            control={Select}
+                            label="Loan Currency"
+                            options={[
+                                {key: 'KM', text: 'KM', value: 'KM'},
+                            ]}
+                            value={'KM'}
+                            disabled={true}
+                            onChange={(e, {value}) => setLoanCurrency(value)}
+                        />
+                    </Form.Group>
+                    <Form.Group widths="equal">
+                        <Form.Field
+                            control={Input}
+                            type="number"
+                            label="Collateral Amount"
+                            value={collateralAmount}
+                            onChange={async (e, {value}) => {
+                                setCollateralAmount(value);
+                            }}
+                        />
+                        <Form.Field control={Select}
+                                    label="Collateral Currency"
+                                    options={[
+                                        {key: 'ETH', text: 'ETH', value: 'ETH'}
+                                    ]}
+                                    value={'ETH'}
+                                    disabled={true}
+                                    onChange={(e, {value}) => setCollateralCurrency(value)}
+                        />
+                    </Form.Group>
+                </Form>
+                <br/>
+                {loading && <Loader active inline="centered"/>}
+            </Segment>
+            <Segment>
+                {collateralValueInKm !== 0 && (
+                    <div style={{textAlign: "center"}}>
+                        <h3>Loan Details:</h3>
+                        <hr/>
+                        <p>
+                            Collateral
+                            Amount: {collateralAmount} {collateralCurrency} (<b>{collateralValueInKm} {loanCurrency}</b>)
+                        </p>
+                        <p>
+                            Allowed loan
+                            range: <b>{loanDownLimit}</b> - <b>{loanUpLimit} {loanCurrency}</b> (LTV: {expectedLtvRatio}%)
+                        </p>
+                        <p>
+                            Allowed collateral
+                            range: <b>{collateralDownLimit}</b> - <b>{collateralUpLimit} {collateralCurrency}</b> (LTV: {expectedLtvRatio}%)
+                        </p>
+                        <p>Loan Amount: {loanAmount} {loanCurrency} {loanValidation}</p>
+                        <p>Collateral Amount: {collateralAmount} {collateralCurrency} {collateralValidation}</p>
+                        <hr/>
+                        <p>Loan Amount: {loanAmount} {loanCurrency}</p>
+                        <p>Interest rate: {loanAmount * (interestRate) / 100} {loanCurrency} ({interestRate}%)</p>
+                        <h4>Total: {total} {loanCurrency}</h4>
+                    </div>
+                )}
+            </Segment>
         </div>
     );
 };

@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import {pastLendEvents, pastLiquidateEvents, pastRepayEvents} from "../../core/dao/loan-withdraw-contract/dao";
 import {StatisticBar} from "../../components/statistic-bar/statistic-bar";
 import {pastDepositEvents, pastInterestEvents, pastWithdrawEvents} from "../../core/dao/savings/dao";
+import {Segment} from "semantic-ui-react";
 
 export default function StatisticsSavingsPage() {
     const [depositHistory, setDepositHistory] = useState([])
@@ -21,21 +22,27 @@ export default function StatisticsSavingsPage() {
         })()
     }, [])
 
-    return <div className={"ui scroll"}>
-        <StatisticBar history={depositHistory}
-                      title={"Deposit amount"}
-                      addressIndex={1}
-                      dataIndex={2}
-        />
-        <StatisticBar history={withdrawHistory}
-                      title={"Withdraw amount"}
-                      addressIndex={1}
-                      dataIndex={2}
-        />
-        <StatisticBar history={interestHistory}
-                      title={"Interest amount"}
-                      addressIndex={1}
-                      dataIndex={2}
-        />
+    return <div style={{textAlign: 'center'}}>
+        <Segment>
+            <StatisticBar history={depositHistory}
+                          title={"Deposit amount"}
+                          addressIndex={1}
+                          dataIndex={2}
+            />
+        </Segment>
+        <Segment>
+            <StatisticBar history={withdrawHistory}
+                          title={"Withdraw amount"}
+                          addressIndex={1}
+                          dataIndex={2}
+            />
+        </Segment>
+        <Segment>
+            <StatisticBar history={interestHistory}
+                          title={"Interest amount"}
+                          addressIndex={1}
+                          dataIndex={2}
+            />
+        </Segment>
     </div>;
 }
