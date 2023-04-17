@@ -1,30 +1,31 @@
 import {useState, useEffect} from 'react';
-import {Header, Segment, Grid, Button, Input} from 'semantic-ui-react';
-import {deposit, getInterestedRate, savings, withdraw} from "../../core/dao/savings/dao";
-import {useDispatch, useSelector} from "react-redux";
-import {executeRefresh, selectRefresh} from "../../redux-slices/refresh-slice";
-import {selectAddress, setAddress} from "../../redux-slices/address-slice";
-import providerDao from "../../core/dao/provider";
-import {selectBalance, setBalance} from "../../redux-slices/balance-slice";
-import {balanceOf} from "../../core/dao/convertible-mark-contract/dao";
+import {Header, Segment, Grid, Input} from 'semantic-ui-react';
+import {getInterestedRate} from "../../core/dao/savings/dao";
+import useAsyncSemaphore from "../../util/semaphore";
 
 export default function SavingsCalculatePage() {
+    const {acquire, release} = useAsyncSemaphore();
+
     const [currentBalance, setCurrentBalance] = useState(0);
     const [savingBalance, setSavingBalance] = useState(0);
     const [depositAmount, setDepositAmount] = useState(0);
     const [withdrawAmount, setWithdrawAmount] = useState(0);
+    const [interestRate, setInterestRate] = useState(0);
     const [depositError, setDepositError] = useState(undefined);
     const [withdrawError, setWithdrawError] = useState(undefined);
 
-    const [newBalanceAfterDeposit, setNewBalanceAfterDeposit] = useState(0);
-    const [newSavingBalanceAfterDeposit, setNewSavingBalanceAfterDeposit] = useState(0);
-    const [newBalanceAfterWithdraw, setNewBalanceAfterWithdraw] = useState(0);
-    const [newSavingBalanceAfterWithdraw, setNewSavingBalanceAfterWithdraw] = useState(0);
-    const [potentialInterestRate, setPotentialInterestRate] = useState(0);
-    const [totalWithInterestedRate, setTotalWithInterestedRate] = useState(0);
+    useEffect(() => {
+        (async function() {
+            setInterestRate(await getInterestedRate());
+        })()
+    }, [currentBalance, savingBalance, depositAmount, withdrawAmount])
 
     useEffect(() => {
-        calculate();
+        (async function() {
+            await acquire();
+            await calculate();
+            await release();
+        })()
     }, [currentBalance, savingBalance, depositAmount, withdrawAmount])
 
     function checkDeposit() {
@@ -50,22 +51,8 @@ export default function SavingsCalculatePage() {
     }
 
     const calculate = async () => {
-        const isDepositOk = checkDeposit();
-        const isWithdrawOk = checkWithdraw();
-
-        if (!(isWithdrawOk || isDepositOk)) {
-            return;
-        }
-
-        setNewBalanceAfterDeposit(currentBalance - depositAmount);
-        setNewSavingBalanceAfterDeposit(savingBalance + depositAmount);
-
-        const interestRate = await getInterestedRate();
-        setPotentialInterestRate(interestRate);
-
-        setNewBalanceAfterWithdraw(currentBalance - depositAmount + withdrawAmount);
-        setNewSavingBalanceAfterWithdraw(savingBalance + depositAmount - withdrawAmount);
-        setTotalWithInterestedRate(newSavingBalanceAfterWithdraw + interestRate * depositAmount / 100.0);
+        checkDeposit();
+        checkWithdraw();
     };
 
     return (
@@ -123,18 +110,18 @@ export default function SavingsCalculatePage() {
                                     <p>Old saving balance: {savingBalance} KM</p>
                                     <hr/>
                                     <Header as="h4">Balances after deposit:</Header>
-                                    <p>New balance: {newBalanceAfterDeposit} KM</p>
-                                    <p>New saving balance: {newSavingBalanceAfterDeposit} KM</p>
+                                    <p>New balance: {currentBalance - depositAmount} KM</p>
+                                    <p>New saving balance: {savingBalance + depositAmount} KM</p>
                                     <hr/>
                                     <Header as="h4">Balances after withdraw:</Header>
-                                    <p>New balance: {newBalanceAfterWithdraw} KM</p>
-                                    <p>New saving balance: {newSavingBalanceAfterWithdraw} KM</p>
+                                    <p>New balance: {currentBalance - depositAmount + withdrawAmount} KM</p>
+                                    <p>New saving balance: {savingBalance + depositAmount - withdrawAmount} KM</p>
                                     <hr/>
                                     <Header as="h4">Total:</Header>
-                                    <p>Total without interest rate: {newSavingBalanceAfterWithdraw} KM</p>
-                                    <p>Interest rate: {potentialInterestRate}%
-                                        = {Math.round((totalWithInterestedRate - newSavingBalanceAfterWithdraw)*100)/100.0} KM</p>
-                                    <p><b>Total: {totalWithInterestedRate} KM</b></p>
+                                    <p>Total without interest rate: {currentBalance - depositAmount + withdrawAmount} KM</p>
+                                    <p>Interest rate: {withdrawAmount} * {interestRate}%
+                                        = {withdrawAmount * interestRate / 100.0} KM</p>
+                                    <p><b>Total: {currentBalance - depositAmount + (1 + interestRate / 100.0) * withdrawAmount} KM</b></p>
                                 </div>
                             )}
                         </Grid.Column>

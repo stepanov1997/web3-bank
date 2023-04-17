@@ -5,7 +5,7 @@ function useAsyncSemaphore() {
 
     async function acquire() {
         while (isRunning) {
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await new Promise(resolve => setTimeout(resolve, 1));
         }
         setIsRunning(true);
     }
